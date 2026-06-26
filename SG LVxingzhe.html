@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI百盒旅行机 手机适配终版</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
+body{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+.wrap{max-width:750px;margin:0 auto}
+h1{color:#fff;text-align:center;margin-bottom:18px;font-size:26px;text-shadow:0 2px 8px rgba(0,0,0,.2)}
+.card{background:#fff;border-radius:14px;padding:20px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.row{display:flex;gap:10px;margin-bottom:12px}
+.row>div{flex:1}
+label{display:block;font-size:13px;font-weight:bold;margin-bottom:6px;color:#334155}
+input,select{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;background:#fff}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tag{padding:6px 12px;border:2px solid #e2e8f0;border-radius:20px;font-size:13px;cursor:pointer;background:#fff;user-select:none;transition:.2s}
+.tag.on{background:#667eea;color:#fff;border-color:#667eea}
+.days{display:flex;gap:8px;margin-top:6px;justify-content:center;flex-wrap:wrap}
+.day{padding:8px 18px;border:2px solid #e2e8f0;border-radius:8px;text-align:center;cursor:pointer;font-size:13px;min-width:110px}
+.day.on{background:#667eea;color:#fff;border-color:#667eea}
+.btn{display:block;width:100%;max-width:260px;margin:18px auto 0;padding:13px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:999px;font-size:15px;font-weight:bold;cursor:pointer;box-shadow:0 4px 15px rgba(102,126,234,.4)}
+.btn:hover{opacity:.9;transform:translateY(-1px)}
+.anim{text-align:center;padding:50px 20px;min-height:280px;display:none;flex-direction:column;align-items:center;justify-content:center}
+.box{width:130px;height:130px;margin:0 auto 20px;background:linear-gradient(135deg,#fbbf24,#f59e0b);border-radius:14px;position:relative;animation:float 2.5s ease-in-out infinite}
+.box::before{content:'';position:absolute;top:-12px;left:-3px;right:-3px;height:26px;background:linear-gradient(180deg,#f97316,#ea580c);border-radius:8px 8px 0 0}
+.box::after{content:'🎁';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:45px}
+.box.shake{animation:shake .25s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
+.result{display:none}
+.result.show{display:block;animation:fadeIn .5s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+.dest-name{text-align:center;font-size:30px;font-weight:bold;color:#667eea;margin-bottom:6px}
+.dest-slogan{text-align:center;color:#64748b;margin-bottom:12px;font-size:14px}
+.dest-tags{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.dest-tag{background:#eef2ff;color:#667eea;padding:3px 10px;border-radius:15px;font-size:12px}
+.overview{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.ov-item{background:#eef2ff;padding:12px 8px;border-radius:10px;text-align:center}
+.ov-item .n{font-size:18px;font-weight:bold;color:#667eea}
+.ov-item .l{font-size:11px;color:#64748b;margin-top:3px}
+.map{height:260px;background:#f8fafc;border-radius:10px;position:relative;overflow:hidden;margin-top:10px;border:1px solid #e2e8f0}
+.map-bg{position:absolute;inset:0;background:linear-gradient(90deg,#e2e8f0 1px,transparent 1px),linear-gradient(#e2e8f0 1px,transparent 1px);background-size:25px 25px}
+.point{position:absolute;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.3);transform:translate(-50%,-50%);z-index:10}
+.point.s{background:#10b981}
+.point.e{background:#ef4444}
+.point.n{background:#3b82f6}
+.point .lb{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;padding:2px 6px;border-radius:3px;font-size:11px;white-space:nowrap;opacity:0;transition:.2s}
+.point:hover .lb{opacity:1}
+.point .seq{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  font-size:10px;font-weight:900;color:#fff;
+  pointer-events:none;
+  text-shadow:0 1px 2px rgba(0,0,0,.5);
+}
+.day-card{border:1px solid #e2e8f0;border-radius:10px;padding:12px;margin-bottom:10px}
+.day-title{font-weight:bold;color:#667eea;margin-bottom:8px;font-size:14px}
+.tl{position:relative;padding-left:20px;margin-bottom:8px}
+.tl::before{content:'';position:absolute;left:3px;top:5px;width:6px;height:6px;border-radius:50%;background:#667eea}
+.tl::after{content:'';position:absolute;left:5px;top:13px;width:1.5px;height:calc(100% - 6px);background:#e2e8f0}
+.tl:last-child::after{display:none}
+.tl .t{font-weight:500;font-size:13px}
+.tl .d{font-size:12px;color:#64748b;margin-top:2px}
+.hotel{border-left:3px solid #667eea;background:#eef2ff;border-radius:0 8px 8px 0;padding:8px 12px;margin-bottom:6px}
+.hotel .n{font-weight:500;font-size:13px}
+.hotel .i{font-size:12px;color:#64748b;margin-top:2px}
+.hotel .p{float:right;color:#667eea;font-weight:bold;font-size:13px}
+.btn-group{display:flex;justify-content:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+.btn2{padding:9px 22px;border-radius:999px;cursor:pointer;font-size:13px;border:1px solid #e2e8f0;background:#fff}
+.btn2.p{background:#667eea;color:#fff;border-color:#667eea}
+.cost-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #e2e8f0;font-size:13px}
+.cost-total{display:flex;justify-content:space-between;padding:10px 0 0;font-weight:bold;font-size:15px}
+.cost-total .p{color:#667eea}
+.sec-title{font-size:16px;font-weight:bold;margin-bottom:10px;color:#1e293b}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.col{background:#eef2ff;padding:10px;border-radius:10px}
+.col h4{font-size:13px;margin-bottom:6px}
+.col ul{font-size:12px;color:#64748b;list-style:none}
+.col li{margin-bottom:3px;padding-left:10px;position:relative}
+.col li::before{content:'•';position:absolute;left:0;color:#667eea}
+.metro{font-size:13px;line-height:1.8;color:#475569}
+
+/* ===== 移动端专项修复 ===== */
+/* iOS Safari：表单元素16px防自动放大 */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  select, input[type="text"] { font-size: 16px; }
+}
+
+@media(max-width:600px){
+  .row{flex-direction:column}
+  .overview{grid-template-columns:repeat(2,1fr)}
+  .three-col{grid-template-columns:1fr}
+  /* 卡片内边距收窄，适配小屏宽度 */
+  .card{padding:14px 12px}
+  /* 地图高度压缩 */
+  .map{height:200px}
+  /* 天数按钮缩小适配 */
+  .day{min-width:90px;padding:8px 10px;font-size:12px}
+  /* 标签加高居中，触控更跟手 */
+  .tag{padding:5px 10px;font-size:12px;min-height:32px;
+       display:flex;align-items:center;justify-content:center}
+  /* 地图点位触控靶扩大至28px，接近44px下限 */
+  .point{width:28px;height:28px}
+  .point .seq{font-size:11px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🎁 盲盒旅行机</h1>
+
+<div id="inputSec" class="card">
+  <div class="row">
+    <div><label>出发城市</label><input type="text" id="depCity" placeholder="例如：南通" value="南通"></div>
+    <div><label>人均预算档位</label>
+      <select id="budget">
+        <option value="1500">💰 经济穷游（1500元内）</option>
+        <option value="3000" selected>🎒 舒适出行（3000元档）</option>
+        <option value="5000">🏨 品质享受（5000元档）</option>
+        <option value="10000">💎 奢华度假（万元以上）</option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <div><label>旅行天数</label>
+      <div class="days" id="dayBox">
+        <div class="day" onclick="setDay(this,3)">3天短途</div>
+        <div class="day on" onclick="setDay(this,5)">5天常规</div>
+        <div class="day" onclick="setDay(this,7)">7天长线</div>
+        <div class="day" onclick="setDay(this,10)">10天+深度游</div>
+      </div>
+    </div>
+    <div><label>出行人群</label>
+      <select id="travelers">
+        <option value="solo" data-num="1" data-name="单人">🚶 独自单人出行</option>
+        <option value="couple" data-num="2" data-name="双人" selected>💑 情侣双人</option>
+        <option value="family" data-num="3.5" data-name="家庭(3-4人)">👨‍👩‍👧 亲子家庭（带娃）</option>
+        <option value="friends" data-num="4" data-name="多人结伴(4人)">👯 朋友多人结伴</option>
+        <option value="elders" data-num="2" data-name="长辈2人团">👴 长辈老年团</option>
+      </select>
+    </div>
+  </div>
+  <div>
+    <label>旅行偏好（可多选/取消）</label>
+    <div class="tags" id="tagBox">
+      <div class="tag on" onclick="toggleTag(this)">🏔️ 自然风光</div>
+      <div class="tag on" onclick="toggleTag(this)">🍜 美食探店</div>
+      <div class="tag on" onclick="toggleTag(this)">🏛️ 历史文化</div>
+      <div class="tag" onclick="toggleTag(this)">🌆 都市休闲</div>
+      <div class="tag" onclick="toggleTag(this)">🏖️ 海岛度假</div>
+      <div class="tag" onclick="toggleTag(this)">🥾 户外探险</div>
+      <div class="tag" onclick="toggleTag(this)">🎨 文艺打卡</div>
+      <div class="tag" onclick="toggleTag(this)">🎡 亲子游乐</div>
+      <div class="tag" onclick="toggleTag(this)">🏮 古镇慢游</div>
+    </div>
+  </div>
+  <button class="btn" onclick="startGame()">🎁 开启旅行盲盒</button>
+</div>
+
+<div id="animSec" class="card anim">
+  <div class="box" id="box"></div>
+  <p id="animText">正在匹配你的出行需求…</p>
+</div>
+
+<div id="resultSec" class="result">
+  <div class="card">
+    <div class="dest-name" id="rName"></div>
+    <div class="dest-slogan" id="rSlogan"></div>
+    <div class="dest-tags" id="rTags"></div>
+  </div>
+  <div class="card">
+    <div class="sec-title">📋 行程概览</div>
+    <div class="overview" id="rOv"></div>
+  </div>
+  <div class="card">
+    <div class="sec-title">🗺️ 城市游览路线</div>
+    <p style="font-size:12px;color:#64748b;margin-bottom:6px">🟢起点 🔴终点 🔵①②③④游览顺序（点击查看详情）</p>
+    <div class="map" id="rMap"><div class="map-bg"></div></div>
+  </div>
+  <div class="card">
+    <div class="sec-title">🗓️ 每日详细行程</div>
+    <div id="rIti"></div>
+  </div>
+  <div class="card">
+    <div class="sec-title">🏨 核心区连锁酒店比价</div>
+    <div id="rHotel"></div>
+  </div>
+  <div class="card">
+    <div class="sec-title">🚇 交通指南</div>
+    <div class="metro" id="rMetro"></div>
+  </div>
+  <div class="card">
+    <div class="sec-title">📝 出行指南</div>
+    <div class="three-col" id="rGuide"></div>
+  </div>
+  <div class="card">
+    <div class="sec-title">💰 费用明细估算</div>
+    <div id="rCost"></div>
+  </div>
+  <div class="btn-group">
+    <button class="btn2" onclick="retry()">🎲 再开一个</button>
+    <button class="btn2" onclick="window.print()">📄 导出PDF</button>
+    <button class="btn2 p" onclick="savePlan()">💾 保存方案</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+var cities = [
+
+// 1.北京
+{
+  name: "北京",
+  slogan: "帝都北京，千年古都",
+  tags: ["历史古都", "皇家园林", "文化中心"],
+  matchTags: ["历史文化", "都市休闲", "文艺打卡", "亲子游乐"],
+  budgetLevel: 3,
+  spots: [
+    {name: "北京站", x: 55, y: 55, type: "s", metro: "2号线 北京站"},
+    {name: "故宫博物院", x: 50, y: 45, type: "n", order: 1, metro: "1号线 天安门东"},
+    {name: "南锣鼓巷", x: 42, y: 35, type: "n", order: 2, metro: "6/8号线 南锣鼓巷"},
+    {name: "颐和园", x: 20, y: 25, type: "n", order: 3, metro: "4号线 北宫门"},
+    {name: "八达岭长城", x: 30, y: 8, type: "n", order: 4, metro: "S2线 八达岭"},
+    {name: "首都机场", x: 80, y: 15, type: "e", metro: "机场线 T2/T3"}
+  ],
+  hotels: [
+    {area: "王府井/天安门", list: [
+      {n: "北京华尔道夫", p: "¥1800-3000", b: "希尔顿", l: "奢华"},
+      {n: "王府井亚朵S", p: "¥500-800", b: "亚朵", l: "中端"},
+      {n: "前门全季", p: "¥400-600", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·天安门夜景", acts: [{ti: "下午", s: "抵达入住王府井", d: "交通便利近地铁"}, {ti: "晚上", s: "天安门降旗+前门大街", d: "看降旗仪式逛老字号"}]},
+    {t: "故宫·景山全景", acts: [{ti: "上午", s: "故宫博物院", d: "提前7天预约，午门进神武门出"}, {ti: "下午", s: "景山公园", d: "登万春亭俯瞰故宫全景"}, {ti: "晚上", s: "南锣鼓巷+后海", d: "逛胡同酒吧街"}]},
+    {t: "八达岭长城全天", acts: [{ti: "全天", s: "八达岭长城", d: "S2线或高铁直达，北八楼往返"}]},
+    {t: "颐和·圆明园", acts: [{ti: "上午", s: "颐和园", d: "皇家园林，4号线北宫门"}, {ti: "下午", s: "圆明园", d: "西洋楼遗址勿忘国耻"}]},
+    {t: "798·收官返程", acts: [{ti: "上午", s: "798艺术区", d: "文艺打卡当代艺术"}, {ti: "下午", s: "三里屯购物", d: "烤鸭伴手礼"}]}
+  ],
+  metro: ["1号线：东西主轴，覆盖天安门/国贸", "2号线：环线换乘神器", "4号线：颐和园/圆明园/北大清华", "出行APP：亿通行"],
+  pack: ["舒适运动鞋", "身份证（必带）", "充电宝", "薄外套", "防晒口罩"],
+  tips: ["故宫务必提前7天抢票", "长城优先S2线，拒绝黑车", "正餐避开景区门店", "南锣鼓巷主街看看就好"],
+  save: ["地铁日票更划算", "景点提前线上购票", "吃饭别在景区", "住宿选地铁口"],
+  costs: [
+    {i: "往返大交通", a: "500-1000"},
+    {i: "4晚住宿", a: "1000-2000"},
+    {i: "餐饮", a: "500-800"},
+    {i: "门票", a: "300-500"},
+    {i: "市内交通", a: "150-250"}
+  ]
+},
+
+// 2.天津
+{
+  name: "天津",
+  slogan: "津门故里，万国建筑",
+  tags: ["欧式风情", "相声之乡", "滨海美食"],
+  matchTags: ["历史文化", "美食探店", "文艺打卡"],
+  budgetLevel: 2,
+  spots: [
+    {name: "天津站", x: 50, y: 40, type: "s", metro: "2/3/9号线 天津站"},
+    {name: "古文化街", x: 40, y: 35, type: "n", order: 1, metro: "2号线 东南角"},
+    {name: "意大利风情区", x: 55, y: 38, type: "n", order: 2, metro: "2号线 建国道"},
+    {name: "五大道", x: 45, y: 55, type: "n", order: 3, metro: "1号线 小白楼"},
+    {name: "天津之眼", x: 30, y: 30, type: "n", order: 4, metro: "1号线 西北角"},
+    {name: "滨海机场", x: 75, y: 10, type: "e", metro: "2号线 滨海机场"}
+  ],
+  hotels: [
+    {area: "和平路/津湾广场", list: [
+      {n: "天津丽思卡尔顿", p: "¥1200-2000", b: "万豪", l: "奢华"},
+      {n: "津湾广场亚朵", p: "¥350-550", b: "亚朵", l: "中端"},
+      {n: "和平路全季", p: "¥280-400", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·海河夜景", acts: [{ti: "下午", s: "抵达入住津湾", d: "步行可达各景点"}, {ti: "晚上", s: "津湾广场+解放桥", d: "海河夜景世纪钟"}]},
+    {t: "古文化·听相声", acts: [{ti: "上午", s: "古文化街", d: "泥人张、杨柳青年画"}, {ti: "下午", s: "意大利风情区", d: "欧式建筑拍照圣地"}]},
+    {t: "五大道·瓷房子", acts: [{ti: "上午", s: "五大道", d: "万国建筑博览会，骑单车"}, {ti: "下午", s: "瓷房子", d: "网红打卡点"}]},
+    {t: "滨海航母一日", acts: [{ti: "全天", s: "滨海航母主题公园", d: "9号线直达，基辅号航母"}]},
+    {t: "西北角早点返程", acts: [{ti: "清晨", s: "西北角早点", d: "锅巴菜、煎饼果子、老豆腐"}, {ti: "下午", s: "采购返程", d: "麻花伴手礼"}]}
+  ],
+  metro: ["1号线：南北主干线", "2号线：机场-鼓楼-天津站", "9号线：去滨海专用", "APP：天津地铁"],
+  pack: ["舒适鞋", "雨伞", "充电宝", "身份证"],
+  tips: ["天津之眼提前买票", "相声茶馆选下午场更便宜", "早点去西北角吃正宗", "狗不理本地人不推荐"],
+  save: ["多数街区免费游览", "地铁覆盖主要景点", "住宿比北京便宜很多"],
+  costs: [
+    {i: "往返交通", a: "300-600"},
+    {i: "4晚住宿", a: "500-800"},
+    {i: "餐饮", a: "300-500"},
+    {i: "门票", a: "200-300"},
+    {i: "市内交通", a: "100-150"}
+  ]
+},
+
+// 3.青岛
+{
+  name: "青岛",
+  slogan: "红瓦绿树，碧海蓝天",
+  tags: ["海滨城市", "啤酒之乡", "欧式建筑"],
+  matchTags: ["海岛度假", "美食探店", "文艺打卡"],
+  budgetLevel: 2,
+  spots: [
+    {name: "青岛站", x: 30, y: 50, type: "s", metro: "3号线 青岛站"},
+    {name: "栈桥", x: 32, y: 55, type: "n", order: 1, metro: "3号线 青岛站步行"},
+    {name: "八大关", x: 40, y: 40, type: "n", order: 2, metro: "3号线 太平角公园"},
+    {name: "五四广场", x: 55, y: 35, type: "n", order: 3, metro: "2/3号线 五四广场"},
+    {name: "崂山", x: 80, y: 20, type: "n", order: 4, metro: "11号线 崂山站"},
+    {name: "胶东机场", x: 10, y: 10, type: "e", metro: "8号线 胶东机场"}
+  ],
+  hotels: [
+    {area: "市南区/栈桥", list: [
+      {n: "青岛海景花园", p: "¥800-1500", b: "本地高端", l: "高端"},
+      {n: "栈桥亚朵", p: "¥350-550", b: "亚朵", l: "中端"},
+      {n: "中山路全季", p: "¥280-400", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·栈桥夜色", acts: [{ti: "下午", s: "抵达入住市南区", d: "靠海出行方便"}, {ti: "晚上", s: "栈桥+中山路", d: "回澜阁夜景逛老街"}]},
+    {t: "八大关·海水浴场", acts: [{ti: "上午", s: "八大关", d: "花石楼、公主楼万国建筑"}, {ti: "下午", s: "第二海水浴场", d: "沙滩漫步"}]},
+    {t: "崂山全天登山", acts: [{ti: "全天", s: "崂山风景区", d: "海上第一名山，太清宫+仰口"}]},
+    {t: "啤酒博物馆·金沙滩", acts: [{ti: "上午", s: "青岛啤酒博物馆", d: "喝原浆啤酒了解历史"}, {ti: "下午", s: "金沙滩", d: "亚洲第一滩沙质细腻"}]},
+    {t: "信号山·收官返程", acts: [{ti: "上午", s: "信号山公园", d: "俯瞰红瓦绿树全景"}, {ti: "下午", s: "采购返程", d: "啤酒海鲜干货伴手礼"}]}
+  ],
+  metro: ["3号线：青岛站-五四广场-李村", "2号线：东西主干线", "11号线：去崂山", "APP：青岛地铁"],
+  pack: ["防晒霜", "泳衣", "舒适鞋", "海边薄外套", "墨镜"],
+  tips: ["啤酒节期间住宿翻倍", "海鲜别在景区排挡吃", "崂山选太清+仰口线", "8月旺季人超多"],
+  save: ["沿海公园全部免费", "地铁覆盖主要景点", "啤酒博物馆门票含两杯酒"],
+  costs: [
+    {i: "往返交通", a: "400-800"},
+    {i: "4晚住宿", a: "600-1000"},
+    {i: "餐饮", a: "400-600"},
+    {i: "门票", a: "300-500"},
+    {i: "市内交通", a: "100-200"}
+  ]
+},
+
+// 4.上海
+{
+  name: "上海",
+  slogan: "魔都上海，东方巴黎",
+  tags: ["国际都市", "时尚之都", "海派文化"],
+  matchTags: ["都市休闲", "美食探店", "文艺打卡"],
+  budgetLevel: 3,
+  spots: [
+    {name: "虹桥站", x: 15, y: 45, type: "s", metro: "2/10号线 虹桥火车站"},
+    {name: "外滩", x: 50, y: 40, type: "n", order: 1, metro: "2号线 南京东路"},
+    {name: "豫园", x: 55, y: 48, type: "n", order: 2, metro: "10号线 豫园"},
+    {name: "陆家嘴", x: 60, y: 35, type: "n", order: 3, metro: "2号线 陆家嘴"},
+    {name: "迪士尼", x: 85, y: 30, type: "n", order: 4, metro: "11号线 迪士尼"},
+    {name: "浦东机场", x: 90, y: 15, type: "e", metro: "2号线 浦东机场"}
+  ],
+  hotels: [
+    {area: "南京路/外滩", list: [
+      {n: "上海外滩华尔道夫", p: "¥2500-4000", b: "希尔顿", l: "奢华"},
+      {n: "南京东路亚朵S", p: "¥600-900", b: "亚朵", l: "中端"},
+      {n: "人民广场全季", p: "¥450-650", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·外滩夜景", acts: [{ti: "下午", s: "抵达入住南京路", d: "地铁便利逛吃一体"}, {ti: "晚上", s: "外滩+南京路", d: "万国建筑夜景繁华商业街"}]},
+    {t: "豫园·陆家嘴", acts: [{ti: "上午", s: "豫园+城隍庙", d: "江南园林南翔小笼"}, {ti: "下午", s: "陆家嘴", d: "东方明珠/上海中心俯瞰魔都"}]},
+    {t: "迪士尼全天", acts: [{ti: "全天", s: "上海迪士尼乐园", d: "11号线直达，建议早享卡"}]},
+    {t: "武康路·田子坊", acts: [{ti: "上午", s: "武康路+安福路", d: "网红马路文艺咖啡"}, {ti: "下午", s: "田子坊", d: "石库门弄堂文艺小店"}]},
+    {t: "中华艺术宫返程", acts: [{ti: "上午", s: "中华艺术宫", d: "原世博中国馆免费"}, {ti: "下午", s: "采购返程", d: "大白兔蝴蝶酥伴手礼"}]}
+  ],
+  metro: ["2号线：东西主轴，连接两大机场", "10号线：新天地/豫园", "11号线：迪士尼专线", "APP：大都会"],
+  pack: ["舒适鞋", "雨伞", "充电宝", "身份证"],
+  tips: ["迪士尼提前买票抢早享卡", "外滩晚上8点灯光秀", "豫园小吃贵且一般", "住宿选地铁口"],
+  save: ["很多景点免费", "地铁发达交通方便", "选经济型连锁酒店"],
+  costs: [
+    {i: "往返交通", a: "500-1000"},
+    {i: "4晚住宿", a: "1200-2000"},
+    {i: "餐饮", a: "500-800"},
+    {i: "门票", a: "500-800"},
+    {i: "市内交通", a: "150-250"}
+  ]
+},
+
+// 5.杭州
+{
+  name: "杭州",
+  slogan: "上有天堂，下有苏杭",
+  tags: ["西湖美景", "江南水乡", "人文荟萃"],
+  matchTags: ["自然风光", "历史文化", "文艺打卡"],
+  budgetLevel: 2,
+  spots: [
+    {name: "杭州东站", x: 70, y: 35, type: "s", metro: "1/4号线 火车东站"},
+    {name: "西湖", x: 45, y: 45, type: "n", order: 1, metro: "1号线 龙翔桥"},
+    {name: "灵隐寺", x: 25, y: 35, type: "n", order: 2, metro: "公交直达"},
+    {name: "河坊街", x: 50, y: 55, type: "n", order: 3, metro: "1号线 定安路"},
+    {name: "西溪湿地", x: 20, y: 55, type: "n", order: 4, metro: "5号线 蒋村"},
+    {name: "萧山机场", x: 85, y: 70, type: "e", metro: "1/7号线 萧山机场"}
+  ],
+  hotels: [
+    {area: "湖滨/西湖边", list: [
+      {n: "杭州西湖国宾馆", p: "¥1500-2500", b: "本地高端", l: "奢华"},
+      {n: "湖滨亚朵", p: "¥450-700", b: "亚朵", l: "中端"},
+      {n: "龙翔桥全季", p: "¥350-500", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·西湖音乐喷泉", acts: [{ti: "下午", s: "抵达入住湖滨", d: "步行到西湖，地铁便利"}, {ti: "晚上", s: "西湖音乐喷泉", d: "湖滨银泰看喷泉逛夜市"}]},
+    {t: "断桥苏堤游船", acts: [{ti: "上午", s: "断桥-白堤-孤山", d: "步行或骑单车游西湖"}, {ti: "下午", s: "苏堤+三潭印月", d: "坐船游湖登小瀛洲"}]},
+    {t: "灵隐·龙井村", acts: [{ti: "上午", s: "灵隐寺+飞来峰", d: "千年古刹祈福圣地"}, {ti: "下午", s: "龙井村+九溪", d: "茶园漫步品茶"}]},
+    {t: "宋城千古情", acts: [{ti: "全天", s: "宋城景区", d: "《宋城千古情》演出必看"}]},
+    {t: "西溪湿地返程", acts: [{ti: "上午", s: "西溪国家湿地公园", d: "摇橹船非诚勿扰取景地"}, {ti: "下午", s: "采购返程", d: "西湖龙井丝绸伴手礼"}]}
+  ],
+  metro: ["1号线：南北主干线，直达西湖", "5号线：西溪湿地方向", "7号线：机场线", "APP：杭州地铁"],
+  pack: ["舒适鞋", "雨伞", "防晒霜", "充电宝", "薄外套"],
+  tips: ["西湖免费但游船收费", "节假日人超级多", "灵隐寺香火很旺", "龙井买茶注意甄别"],
+  save: ["西湖景区大部分免费", "地铁公交方便", "住宿选地铁口比湖边便宜"],
+  costs: [
+    {i: "往返交通", a: "400-800"},
+    {i: "4晚住宿", a: "700-1200"},
+    {i: "餐饮", a: "400-600"},
+    {i: "门票", a: "200-400"},
+    {i: "市内交通", a: "100-200"}
+  ]
+},
+
+// 6.苏州
+{
+  name: "苏州",
+  slogan: "园林之城，东方威尼斯",
+  tags: ["古典园林", "江南水乡", "吴文化"],
+  matchTags: ["历史文化", "自然风光", "文艺打卡"],
+  budgetLevel: 2,
+  spots: [
+    {name: "苏州站", x: 50, y: 20, type: "s", metro: "2/4号线 苏州火车站"},
+    {name: "拙政园", x: 45, y: 30, type: "n", order: 1, metro: "4号线 北寺塔"},
+    {name: "平江路", x: 52, y: 35, type: "n", order: 2, metro: "1号线 相门"},
+    {name: "虎丘", x: 25, y: 25, type: "n", order: 3, metro: "公交直达"},
+    {name: "同里古镇", x: 75, y: 70, type: "n", order: 4, metro: "4号线 同里"},
+    {name: "高铁北站", x: 70, y: 10, type: "e", metro: "2号线 高铁苏州北站"}
+  ],
+  hotels: [
+    {area: "观前街/平江路", list: [
+      {n: "苏州香格里拉", p: "¥800-1300", b: "香格里拉", l: "高端"},
+      {n: "观前街亚朵", p: "¥350-550", b: "亚朵", l: "中端"},
+      {n: "平江路全季", p: "¥300-450", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·平江路夜景", acts: [{ti: "下午", s: "抵达入住观前街", d: "逛吃便利近地铁"}, {ti: "晚上", s: "平江路历史街区", d: "小桥流水江南水乡夜景"}]},
+    {t: "园林一日", acts: [{ti: "上午", s: "拙政园", d: "中国四大名园之首"}, {ti: "下午", s: "苏州博物馆+狮子林", d: "贝聿铭设计假山迷宫"}]},
+    {t: "虎丘·寒山寺", acts: [{ti: "上午", s: "虎丘", d: "吴中第一名胜虎丘塔"}, {ti: "下午", s: "寒山寺", d: "姑苏城外寒山寺"}]},
+    {t: "同里古镇", acts: [{ti: "全天", s: "同里古镇", d: "江南六大古镇之一退思园"}]},
+    {t: "金鸡湖收官", acts: [{ti: "上午", s: "金鸡湖", d: "现代苏州东方之门"}, {ti: "下午", s: "采购返程", d: "苏绣碧螺春糕点伴手礼"}]}
+  ],
+  metro: ["1号线：东西主干线", "2号线：南北+高铁北站", "4号线：同里古镇方向", "APP：苏e行"],
+  pack: ["舒适鞋", "雨伞", "充电宝", "薄外套"],
+  tips: ["园林建议请讲解不然看不懂", "古镇早上人少体验好", "苏博免费需预约", "夏季注意防蚊"],
+  save: ["很多小园林不贵", "地铁公交方便", "古镇联票划算"],
+  costs: [
+    {i: "往返交通", a: "300-600"},
+    {i: "4晚住宿", a: "500-900"},
+    {i: "餐饮", a: "300-500"},
+    {i: "门票", a: "300-500"},
+    {i: "市内交通", a: "100-150"}
+  ]
+},
+
+// 7.南京
+{
+  name: "南京",
+  slogan: "六朝古都，金陵风韵",
+  tags: ["历史古都", "民国风情", "江南烟雨"],
+  matchTags: ["历史文化", "美食探店", "自然风光"],
+  budgetLevel: 2,
+  spots: [
+    {name: "南京南站", x: 60, y: 75, type: "s", metro: "1/3/S1号线 南京南站"},
+    {name: "夫子庙", x: 50, y: 55, type: "n", order: 1, metro: "3号线 夫子庙"},
+    {name: "中山陵", x: 65, y: 40, type: "n", order: 2, metro: "2号线 苜蓿园"},
+    {name: "总统府", x: 45, y: 45, type: "n", order: 3, metro: "2/3号线 大行宫"},
+    {name: "牛首山", x: 75, y: 80, type: "n", order: 4, metro: "公交直达"},
+    {name: "禄口机场", x: 80, y: 90, type: "e", metro: "S1号线 禄口机场"}
+  ],
+  hotels: [
+    {area: "新街口/夫子庙", list: [
+      {n: "南京金陵饭店", p: "¥700-1200", b: "本地老牌", l: "高端"},
+      {n: "新街口亚朵S", p: "¥400-600", b: "亚朵", l: "中端"},
+      {n: "夫子庙全季", p: "¥300-450", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·秦淮河夜景", acts: [{ti: "下午", s: "抵达入住新街口", d: "地铁枢纽逛吃方便"}, {ti: "晚上", s: "夫子庙+秦淮河", d: "夜游秦淮河逛灯会"}]},
+    {t: "中山陵·明孝陵", acts: [{ti: "上午", s: "中山陵", d: "免费需预约，392级台阶"}, {ti: "下午", s: "明孝陵+美龄宫", d: "世界文化遗产秋天最美"}]},
+    {t: "总统府·玄武湖", acts: [{ti: "上午", s: "总统府", d: "民国政府旧址近代史博物馆"}, {ti: "下午", s: "玄武湖公园", d: "江南三大名湖免费"}]},
+    {t: "牛首山一日", acts: [{ti: "全天", s: "牛首山文化旅游区", d: "佛顶宫建筑震撼"}]},
+    {t: "南博·收官返程", acts: [{ti: "上午", s: "南京博物院", d: "中国三大博物馆之一免费"}, {ti: "下午", s: "采购返程", d: "盐水鸭雨花茶伴手礼"}]}
+  ],
+  metro: ["1号线：南北主轴", "2号线：东西主轴，覆盖中山陵", "3号线：夫子庙-南京站", "S1号线：机场线", "APP：支付宝乘车码"],
+  pack: ["舒适鞋", "雨伞", "充电宝", "身份证"],
+  tips: ["中山陵提前预约", "夫子庙小吃看看就好", "明孝陵石象路秋天最美", "南京博物院提前约"],
+  save: ["很多景点免费", "地铁发达交通便宜", "住宿比上海便宜很多"],
+  costs: [
+    {i: "往返交通", a: "300-600"},
+    {i: "4晚住宿", a: "500-800"},
+    {i: "餐饮", a: "300-500"},
+    {i: "门票", a: "200-400"},
+    {i: "市内交通", a: "100-150"}
+  ]
+},
+
+// 8.厦门
+{
+  name: "厦门",
+  slogan: "海上花园，文艺厦门",
+  tags: ["海岛风情", "文艺小清新", "闽南文化"],
+  matchTags: ["海岛度假", "文艺打卡", "美食探店"],
+  budgetLevel: 3,
+  spots: [
+    {name: "高崎机场", x: 20, y: 15, type: "s", metro: "1号线 高崎"},
+    {name: "鼓浪屿", x: 35, y: 50, type: "n", order: 1, metro: "轮渡前往"},
+    {name: "中山路", x: 45, y: 45, type: "n", order: 2, metro: "1号线 镇海路"},
+    {name: "厦门大学", x: 55, y: 58, type: "n", order: 3, metro: "公交直达"},
+    {name: "曾厝垵", x: 65, y: 60, type: "n", order: 4, metro: "公交直达"},
+    {name: "集美学村", x: 15, y: 30, type: "e", metro: "1号线 集美学村"}
+  ],
+  hotels: [
+    {area: "中山路/轮渡", list: [
+      {n: "厦门鹭江宾馆", p: "¥600-1000", b: "本地老牌", l: "高端"},
+      {n: "中山路亚朵", p: "¥350-550", b: "亚朵", l: "中端"},
+      {n: "镇海路全季", p: "¥300-450", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·中山路夜景", acts: [{ti: "下午", s: "抵达入住中山路", d: "去鼓浪屿方便逛吃一体"}, {ti: "晚上", s: "中山路步行街", d: "骑楼建筑闽南小吃"}]},
+    {t: "鼓浪屿一日", acts: [{ti: "全天", s: "鼓浪屿", d: "提前买船票，日光岩、菽庄花园、钢琴博物馆"}]},
+    {t: "厦大·南普陀", acts: [{ti: "上午", s: "南普陀寺", d: "闽南佛教圣地素饼好吃"}, {ti: "下午", s: "厦门大学", d: "提前预约芙蓉隧道白城沙滩"}]},
+    {t: "环岛路·曾厝垵", acts: [{ti: "上午", s: "环岛路骑行", d: "白城到黄厝最美海岸线"}, {ti: "下午", s: "曾厝垵", d: "文艺小渔村逛吃"}]},
+    {t: "集美学村收官", acts: [{ti: "上午", s: "集美学村", d: "嘉庚建筑龙舟池"}, {ti: "下午", s: "采购返程", d: "馅饼肉脯茶叶伴手礼"}]}
+  ],
+  metro: ["1号线：南北主干线，集美学村-镇海路", "BRT快速公交覆盖主要区域", "鼓浪屿必须坐船提前订票", "APP：厦门地铁"],
+  pack: ["防晒霜", "泳衣", "墨镜", "舒适鞋", "薄外套"],
+  tips: ["鼓浪屿船票提前买", "厦门大学提前3天预约", "曾厝垵小吃贵且一般", "节假日住宿翻倍"],
+  save: ["很多景点免费", "公交便宜方便", "住岛外更便宜但远"],
+  costs: [
+    {i: "往返交通", a: "500-1000"},
+    {i: "4晚住宿", a: "600-1200"},
+    {i: "餐饮", a: "400-600"},
+    {i: "门票", a: "200-400"},
+    {i: "市内交通", a: "150-250"}
+  ]
+},
+
+// 9.广州
+{
+  name: "广州",
+  slogan: "食在广州，花城之都",
+  tags: ["美食天堂", "岭南文化", "商贸之都"],
+  matchTags: ["美食探店", "都市休闲", "历史文化"],
+  budgetLevel: 2,
+  spots: [
+    {name: "白云机场", x: 30, y: 10, type: "s", metro: "3号线 机场南/北"},
+    {name: "广州塔", x: 55, y: 50, type: "n", order: 1, metro: "3/APM线 广州塔"},
+    {name: "沙面岛", x: 25, y: 55, type: "n", order: 2, metro: "1/6号线 黄沙"},
+    {name: "陈家祠", x: 35, y: 45, type: "n", order: 3, metro: "1号线 陈家祠"},
+    {name: "长隆", x: 75, y: 70, type: "n", order: 4, metro: "3/7号线 汉溪长隆"},
+    {name: "广州南站", x: 20, y: 85, type: "e", metro: "2/7号线 广州南站"}
+  ],
+  hotels: [
+    {area: "珠江新城", list: [
+      {n: "广州四季酒店", p: "¥1500-2500", b: "四季", l: "奢华"},
+      {n: "珠江新城亚朵S", p: "¥400-650", b: "亚朵", l: "中端"},
+      {n: "体育西路全季", p: "¥300-450", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·珠江夜景", acts: [{ti: "下午", s: "抵达入住珠江新城", d: "CBD核心交通便利"}, {ti: "晚上", s: "广州塔+珠江夜游", d: "小蛮腰夜景坐游船"}]},
+    {t: "沙面·上下九", acts: [{ti: "上午", s: "沙面岛", d: "欧式建筑群拍照圣地"}, {ti: "下午", s: "上下九+陈家祠", d: "西关风情岭南建筑"}]},
+    {t: "长隆一日", acts: [{ti: "全天", s: "长隆欢乐世界/野生动物世界", d: "二选一玩一整天"}]},
+    {t: "越秀·东山口", acts: [{ti: "上午", s: "越秀公园+五羊石像", d: "广州地标"}, {ti: "下午", s: "东山口", d: "老广州洋房文艺打卡"}]},
+    {t: "早茶收官", acts: [{ti: "上午", s: "喝早茶", d: "体验广式早茶文化点都德"}, {ti: "下午", s: "采购返程", d: "鸡仔饼腊肠凉茶伴手礼"}]}
+  ],
+  metro: ["3号线：南北主干线，机场-广州塔-长隆", "1号线：东西老城区", "2号线：广州南站-嘉禾望岗", "APP：羊城通/支付宝"],
+  pack: ["短袖+薄外套", "雨伞", "防晒霜", "充电宝", "肠胃药"],
+  tips: ["喝早茶选老字号", "广州塔晚上去更好看", "长隆建议工作日去人少", "别在景区吃正宗粤菜"],
+  save: ["地铁发达交通便宜", "美食丰俭由人", "很多公园免费"],
+  costs: [
+    {i: "往返交通", a: "500-1000"},
+    {i: "4晚住宿", a: "600-1000"},
+    {i: "餐饮", a: "400-600"},
+    {i: "门票", a: "300-500"},
+    {i: "市内交通", a: "100-200"}
+  ]
+},
+
+// 10.深圳
+{
+  name: "深圳",
+  slogan: "科技之都，活力深圳",
+  tags: ["科技之城", "现代都市", "山海风光"],
+  matchTags: ["都市休闲", "自然风光", "亲子游乐"],
+  budgetLevel: 3,
+  spots: [
+    {name: "宝安机场", x: 15, y: 40, type: "s", metro: "11号线 机场"},
+    {name: "世界之窗", x: 40, y: 50, type: "n", order: 1, metro: "1/2号线 世界之窗"},
+    {name: "深圳湾公园", x: 35, y: 65, type: "n", order: 2, metro: "9号线 深圳湾公园"},
+    {name: "华侨城", x: 45, y: 45, type: "n", order: 3, metro: "1号线 华侨城"},
+    {name: "大梅沙", x: 80, y: 60, type: "n", order: 4, metro: "公交直达"},
+    {name: "福田站", x: 55, y: 30, type: "e", metro: "2/3/11号线 福田站"}
+  ],
+  hotels: [
+    {area: "福田CBD", list: [
+      {n: "深圳柏悦酒店", p: "¥1800-3000", b: "凯悦", l: "奢华"},
+      {n: "福田亚朵S", p: "¥450-700", b: "亚朵", l: "中端"},
+      {n: "华强北全季", p: "¥350-500", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·深圳湾夜景", acts: [{ti: "下午", s: "抵达入住福田", d: "CBD核心交通便利"}, {ti: "晚上", s: "深圳湾公园", d: "人才公园灯光秀看香港"}]},
+    {t: "世界之窗/欢乐谷", acts: [{ti: "全天", s: "世界之窗或欢乐谷", d: "二选一玩一整天"}]},
+    {t: "华侨城·大梅沙", acts: [{ti: "上午", s: "华侨城创意园", d: "文艺打卡咖啡馆"}, {ti: "下午", s: "大梅沙海滨公园", d: "深圳最大免费海滩"}]},
+    {t: "华强北·东门", acts: [{ti: "上午", s: "华强北", d: "中国电子第一街"}, {ti: "下午", s: "东门老街", d: "深圳最老商业街"}]},
+    {t: "莲花山收官", acts: [{ti: "上午", s: "莲花山公园", d: "俯瞰深圳CBD全景"}, {ti: "下午", s: "采购返程", d: "电子产品港式点心"}]}
+  ],
+  metro: ["1号线：东西主干线", "2号线：蛇口-华强北", "11号线：机场快线", "APP：深圳通/支付宝"],
+  pack: ["短袖+薄外套", "防晒霜", "雨伞", "充电宝", "泳衣"],
+  tips: ["大梅沙旺季人超多", "世界之窗晚上有演出", "海鲜街先问价再吃", "节假日地铁延长运营"],
+  save: ["很多公园免费", "地铁覆盖广", "住宿选关外便宜但远"],
+  costs: [
+    {i: "往返交通", a: "600-1200"},
+    {i: "4晚住宿", a: "800-1400"},
+    {i: "餐饮", a: "400-600"},
+    {i: "门票", a: "300-500"},
+    {i: "市内交通", a: "150-250"}
+  ]
+},
+
+// 11.三亚
+{
+  name: "三亚",
+  slogan: "东方夏威夷，热带天堂",
+  tags: ["海岛度假", "阳光沙滩", "热带风情"],
+  matchTags: ["海岛度假", "亲子游乐", "自然风光"],
+  budgetLevel: 3,
+  spots: [
+    {name: "凤凰机场", x: 20, y: 50, type: "s", metro: "公交/打车"},
+    {name: "三亚湾", x: 30, y: 45, type: "n", order: 1, metro: "公交直达"},
+    {name: "亚龙湾", x: 75, y: 35, type: "n", order: 2, metro: "公交/打车"},
+    {name: "蜈支洲岛", x: 90, y: 25, type: "n", order: 3, metro: "打车到码头坐船"},
+    {name: "南山寺", x: 15, y: 70, type: "n", order: 4, metro: "公交直达"},
+    {name: "海棠湾", x: 85, y: 20, type: "e", metro: "公交/打车"}
+  ],
+  hotels: [
+    {area: "亚龙湾", list: [
+      {n: "亚龙湾丽思卡尔顿", p: "¥2000-4000", b: "万豪", l: "奢华"},
+      {n: "亚龙湾希尔顿", p: "¥1200-2000", b: "希尔顿", l: "高端"},
+      {n: "亚龙湾全季", p: "¥400-600", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·三亚湾日落", acts: [{ti: "下午", s: "抵达入住亚龙湾", d: "建议住亚龙湾沙质最好"}, {ti: "晚上", s: "三亚湾椰梦长廊", d: "看最美日落"}]},
+    {t: "蜈支洲岛一日", acts: [{ti: "全天", s: "蜈支洲岛", d: "中国马尔代夫潜水水上项目"}]},
+    {t: "亚龙湾·森林公园", acts: [{ti: "上午", s: "亚龙湾热带天堂森林公园", d: "非诚勿扰取景地玻璃栈道"}, {ti: "下午", s: "亚龙湾沙滩", d: "天下第一湾"}]},
+    {t: "南山寺·天涯海角", acts: [{ti: "上午", s: "南山文化旅游区", d: "108米海上观音"}, {ti: "下午", s: "天涯海角", d: "打卡地标到此一游"}]},
+    {t: "免税城收官", acts: [{ti: "上午", s: "海棠湾免税城", d: "离岛免税买买买"}, {ti: "下午", s: "返程", d: "椰子糖胡椒粉伴手礼"}]}
+  ],
+  metro: ["无地铁，公交+打车为主", "景点分散建议租车或报一日游", "海棠湾-亚龙湾-三亚湾由东到西", "APP：高德地图打车"],
+  pack: ["防晒霜SPF50+", "泳衣多带一套", "墨镜", "遮阳帽", "防蚊液"],
+  tips: ["11-3月是旺季价格翻倍", "海鲜加工先问价", "蜈支洲岛提前买票", "免税店记得带身份证"],
+  save: ["住三亚湾比亚龙湾便宜一半", "报一日游比自己去划算", "海鲜别在景区吃"],
+  costs: [
+    {i: "往返交通", a: "800-2000"},
+    {i: "4晚住宿", a: "1200-3000"},
+    {i: "餐饮", a: "500-800"},
+    {i: "门票+项目", a: "800-1500"},
+    {i: "市内交通", a: "300-500"}
+  ]
+},
+
+// 12.桂林
+{
+  name: "桂林",
+  slogan: "桂林山水甲天下",
+  tags: ["山水画卷", "喀斯特地貌", "漓江风光"],
+  matchTags: ["自然风光", "户外探险", "文艺打卡"],
+  budgetLevel: 2,
+  spots: [
+    {name: "两江机场", x: 20, y: 20, type: "s", metro: "机场大巴"},
+    {name: "象鼻山", x: 50, y: 50, type: "n", order: 1, metro: "公交直达"},
+    {name: "漓江", x: 60, y: 60, type: "n", order: 2, metro: "游船"},
+    {name: "遇龙河", x: 65, y: 75, type: "n", order: 3, metro: "打车/骑行"},
+    {name: "龙脊梯田", x: 30, y: 15, type: "n", order: 4, metro: "大巴2.5小时"},
+    {name: "桂林北站", x: 45, y: 35, type: "e", metro: "公交直达"}
+  ],
+  hotels: [
+    {area: "桂林市区", list: [
+      {n: "桂林香格里拉", p: "¥600-1000", b: "香格里拉", l: "高端"},
+      {n: "两江四湖亚朵", p: "¥300-500", b: "亚朵", l: "中端"},
+      {n: "中山路全季", p: "¥250-380", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·两江四湖夜景", acts: [{ti: "下午", s: "抵达入住市区", d: "住市中心出行方便"}, {ti: "晚上", s: "两江四湖夜游", d: "乘船看夜景"}]},
+    {t: "漓江·阳朔", acts: [{ti: "上午", s: "漓江游船", d: "桂林到阳朔，20元人民币背景"}, {ti: "下午", s: "阳朔西街", d: "逛洋人街"}]},
+    {t: "遇龙河·十里画廊", acts: [{ti: "上午", s: "遇龙河漂流", d: "人工竹筏更安静更美"}, {ti: "下午", s: "十里画廊骑行", d: "沿途风景绝美"}]},
+    {t: "龙脊梯田", acts: [{ti: "全天", s: "龙脊梯田", d: "大寨金坑梯田壮族风情"}]},
+    {t: "象鼻山·收官", acts: [{ti: "上午", s: "象鼻山公园", d: "桂林城徽"}, {ti: "下午", s: "东西巷+返程", d: "三花酒桂花糕伴手礼"}]}
+  ],
+  metro: ["无地铁，公交+大巴为主", "桂林到阳朔：游船/大巴/拼车", "景点分散建议报一日游", "APP：滴滴打车方便"],
+  pack: ["舒适鞋", "雨伞", "防晒霜", "充电宝", "薄外套"],
+  tips: ["漓江游船选正规公司", "遇龙河漂流提前订票", "龙脊梯田5-10月最美", "西街酒吧先看价"],
+  save: ["报一日游比自己去省心便宜", "住宿选市区比阳朔便宜", "米粉5-8元一碗超便宜"],
+  costs: [
+    {i: "往返交通", a: "600-1200"},
+    {i: "4晚住宿", a: "500-1000"},
+    {i: "餐饮", a: "300-500"},
+    {i: "门票+游船", a: "500-800"},
+    {i: "市内交通", a: "200-400"}
+  ]
+},
+
+// 13.武汉
+{
+  name: "武汉",
+  slogan: "江城武汉，九省通衢",
+  tags: ["江城风情", "历史重镇", "樱花之都"],
+  matchTags: ["历史文化", "美食探店", "自然风光"],
+  budgetLevel: 2,
+  spots: [
+    {name: "天河机场", x: 25, y: 10, type: "s", metro: "2号线 天河机场"},
+    {name: "黄鹤楼", x: 50, y: 45, type: "n", order: 1, metro: "5号线 司门口黄鹤楼"},
+    {name: "武汉大学", x: 55, y: 35, type: "n", order: 2, metro: "2号线 街道口"},
+    {name: "东湖", x: 70, y: 30, type: "n", order: 3, metro: "8号线 梨园"},
+    {name: "江汉路", x: 35, y: 40, type: "n", order: 4, metro: "2号线 江汉路"},
+    {name: "武汉站", x: 75, y: 20, type: "e", metro: "4号线 武汉站"}
+  ],
+  hotels: [
+    {area: "江汉路/汉口", list: [
+      {n: "武汉马哥孛罗", p: "¥700-1200", b: "九龙仓", l: "高端"},
+      {n: "江汉路亚朵", p: "¥300-500", b: "亚朵", l: "中端"},
+      {n: "汉口全季", p: "¥250-400", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·江汉路夜景", acts: [{ti: "下午", s: "抵达入住江汉路", d: "逛吃方便近地铁"}, {ti: "晚上", s: "江汉路+汉口江滩", d: "百年老街长江夜景"}]},
+    {t: "黄鹤楼·户部巷", acts: [{ti: "上午", s: "黄鹤楼", d: "江南三大名楼俯瞰长江"}, {ti: "下午", s: "户部巷+长江大桥", d: "武汉小吃步行过江"}]},
+    {t: "武大·东湖", acts: [{ti: "上午", s: "武汉大学", d: "最美大学樱花季必去"}, {ti: "下午", s: "东湖风景区", d: "中国最大城中湖"}]},
+    {t: "木兰草原", acts: [{ti: "全天", s: "木兰草原", d: "武汉后花园草原风情"}]},
+    {t: "省博·收官", acts: [{ti: "上午", s: "湖北省博物馆", d: "越王勾践剑曾侯乙编钟"}, {ti: "下午", s: "吉庆街+返程", d: "热干面鸭脖伴手礼"}]}
+  ],
+  metro: ["2号线：南北主干线，机场-光谷", "4号线：武汉站-武昌站", "5号线：黄鹤楼-白沙洲", "APP：Metro新时代"],
+  pack: ["舒适鞋", "雨伞", "充电宝", "薄外套"],
+  tips: ["武大樱花季3月中下旬人超多", "黄鹤楼门票小贵但值得", "户部巷本地人不去去粮道街", "夏天巨热别去"],
+  save: ["地铁发达交通便宜", "很多景点免费", "美食超便宜"],
+  costs: [
+    {i: "往返交通", a: "400-800"},
+    {i: "4晚住宿", a: "500-800"},
+    {i: "餐饮", a: "300-500"},
+    {i: "门票", a: "200-400"},
+    {i: "市内交通", a: "100-150"}
+  ]
+},
+
+// 14.长沙
+{
+  name: "长沙",
+  slogan: "星城长沙，娱乐之都",
+  tags: ["美食天堂", "娱乐之都", "山水洲城"],
+  matchTags: ["美食探店", "都市休闲", "历史文化"],
+  budgetLevel: 2,
+  spots: [
+    {name: "黄花机场", x: 80, y: 15, type: "s", metro: "6号线 黄花机场T1T2"},
+    {name: "橘子洲", x: 45, y: 50, type: "n", order: 1, metro: "2号线 橘子洲"},
+    {name: "岳麓山", x: 25, y: 45, type: "n", order: 2, metro: "4号线 湖南大学"},
+    {name: "五一广场", x: 50, y: 45, type: "n", order: 3, metro: "1/2号线 五一广场"},
+    {name: "湖南省博", x: 55, y: 35, type: "n", order: 4, metro: "6号线 湘雅医院"},
+    {name: "长沙南站", x: 75, y: 60, type: "e", metro: "2/4号线 长沙火车南站"}
+  ],
+  hotels: [
+    {area: "五一广场", list: [
+      {n: "长沙W酒店", p: "¥1000-1800", b: "万豪", l: "奢华"},
+      {n: "五一广场亚朵S", p: "¥350-550", b: "亚朵", l: "中端"},
+      {n: "黄兴广场全季", p: "¥280-420", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·五一广场夜生活", acts: [{ti: "下午", s: "抵达入住五一广场", d: "逛吃方便地铁枢纽"}, {ti: "晚上", s: "五一广场+太平街", d: "长沙夜生活喝奶茶"}]},
+    {t: "橘子洲·岳麓山", acts: [{ti: "上午", s: "橘子洲头", d: "小火车往返看毛主席雕像"}, {ti: "下午", s: "岳麓山+岳麓书院", d: "爱晚亭千年学府"}]},
+    {t: "湖南省博·世界之窗", acts: [{ti: "上午", s: "湖南省博物馆", d: "马王堆汉墓辛追夫人"}, {ti: "下午", s: "世界之窗", d: "主题乐园"}]},
+    {t: "谢子龙·梅溪湖", acts: [{ti: "上午", s: "谢子龙影像馆", d: "网红拍照点"}, {ti: "下午", s: "梅溪湖大剧院", d: "建筑美学"}]},
+    {t: "美食收官", acts: [{ti: "上午", s: "米粉一条街", d: "长沙米粉"}, {ti: "下午", s: "采购返程", d: "臭豆腐酱板鸭茶颜周边"}]}
+  ],
+  metro: ["2号线：东西主轴，橘子洲-五一广场-高铁站", "1号线：南北主干线", "4号线：岳麓山-高铁南", "6号线：机场线", "APP：长沙地铁"],
+  pack: ["舒适鞋", "雨伞", "充电宝", "肠胃药（吃辣）"],
+  tips: ["茶颜悦色随处可见不用排太久", "文和友拍照可以吃饭一般", "岳麓山建议东门上西门下", "湖南省博提前预约"],
+  save: ["地铁发达交通便宜", "美食便宜好吃", "很多景点免费"],
+  costs: [
+    {i: "往返交通", a: "400-800"},
+    {i: "4晚住宿", a: "500-800"},
+    {i: "餐饮", a: "400-600"},
+    {i: "门票", a: "200-300"},
+    {i: "市内交通", a: "100-150"}
+  ]
+},
+
+// 15.成都
+{
+  name: "成都",
+  slogan: "一座来了就不想走的城市",
+  tags: ["美食天堂", "休闲慢生活", "历史文化"],
+  matchTags: ["美食探店", "历史文化", "文艺打卡"],
+  budgetLevel: 2,
+  spots: [
+    {name: "成都东站", x: 75, y: 50, type: "s", metro: "2/7号线 成都东站"},
+    {name: "春熙路/太古里", x: 50, y: 42, type: "n", order: 1, metro: "2/3号线 春熙路"},
+    {name: "宽窄巷子", x: 32, y: 40, type: "n", order: 2, metro: "4号线 宽窄巷子"},
+    {name: "大熊猫基地", x: 55, y: 18, type: "n", order: 3, metro: "3号线 熊猫大道"},
+    {name: "都江堰", x: 10, y: 20, type: "n", order: 4, metro: "成灌高铁"},
+    {name: "双流机场", x: 20, y: 85, type: "e", metro: "10号线 双流机场"}
+  ],
+  hotels: [
+    {area: "春熙路商圈", list: [
+      {n: "成都茂业JW万豪", p: "¥1200-1800", b: "万豪集团", l: "奢华"},
+      {n: "太古里桔子水晶", p: "¥450-650", b: "华住集团", l: "中端"},
+      {n: "春熙路全季", p: "¥300-450", b: "华住集团", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·市中心初探", acts: [{ti: "下午", s: "抵达入住春熙路", d: "地铁枢纽放下行李"}, {ti: "晚上", s: "春熙路+宽窄巷子", d: "打卡爬墙熊猫逛古街"}]},
+    {t: "国宝·诗圣故居", acts: [{ti: "上午", s: "大熊猫基地", d: "建议8点前到看熊猫吃早餐"}, {ti: "下午", s: "杜甫草堂+青羊宫", d: "感受诗圣居所中式园林"}]},
+    {t: "都江堰·青城山", acts: [{ti: "全天", s: "都江堰+青城山", d: "成都西站乘成灌高铁世界文化遗产"}]},
+    {t: "市井慢生活", acts: [{ti: "上午", s: "人民公园鹤鸣茶社", d: "喝盖碗茶掏耳朵"}, {ti: "下午", s: "东郊记忆", d: "老工厂文创园工业风拍照"}]},
+    {t: "美食收官", acts: [{ti: "上午", s: "文殊院", d: "千年古刹甜水面三大炮必吃"}, {ti: "下午", s: "采购返程", d: "火锅底料牛肉干伴手礼"}]}
+  ],
+  metro: ["2号线：东西主干线，覆盖春熙路", "3号线：连接熊猫基地春熙路", "4号线：串联宽窄巷子杜甫草堂", "7号线：环线换乘神器", "APP：天府通"],
+  pack: ["舒适运动鞋", "肠胃药（吃辣必备）", "防晒伞", "薄外套", "充电宝+身份证"],
+  tips: ["火锅店别去景区门口往巷子里走", "锦里小吃看看就好", "熊猫基地一定要早上去", "都江堰别跟路边低价团"],
+  save: ["景点提前一天网上买票", "地铁用天府通享9折", "火锅选午市套餐更便宜", "住宿选地铁口省打车费"],
+  costs: [
+    {i: "往返大交通", a: "800-1200"},
+    {i: "4晚住宿", a: "800-1200"},
+    {i: "餐饮美食", a: "400-600"},
+    {i: "景点门票", a: "300-400"},
+    {i: "市内交通", a: "100-150"}
+  ]
+},
+
+// 16.重庆
+{
+  name: "重庆",
+  slogan: "8D魔幻山城，火锅之都",
+  tags: ["美食圣地", "赛博朋克", "网红打卡"],
+  matchTags: ["美食探店", "都市休闲", "文艺打卡"],
+  budgetLevel: 2,
+  spots: [
+    {name: "江北机场", x: 20, y: 10, type: "s", metro: "3号线 江北机场"},
+    {name: "解放碑", x: 50, y: 35, type: "n", order: 1, metro: "2号线 临江门"},
+    {name: "洪崖洞", x: 58, y: 32, type: "n", order: 2, metro: "1/6号线 小什字"},
+    {name: "磁器口", x: 15, y: 55, type: "n", order: 3, metro: "1号线 磁器口"},
+    {name: "李子坝", x: 30, y: 45, type: "n", order: 4, metro: "2号线 李子坝"},
+    {name: "重庆北站", x: 45, y: 15, type: "e", metro: "3/10号线 重庆北站"}
+  ],
+  hotels: [
+    {area: "解放碑/洪崖洞", list: [
+      {n: "解放碑威斯汀", p: "¥1300-2000", b: "万豪", l: "奢华"},
+      {n: "洪崖洞亚朵S", p: "¥500-700", b: "亚朵", l: "中端"},
+      {n: "解放碑全季", p: "¥350-500", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·洪崖洞夜景", acts: [{ti: "下午", s: "抵达入住解放碑", d: "3号线转2号线临江门站"}, {ti: "晚上", s: "洪崖洞+千厮门", d: "19:30亮灯桥上看最佳"}]},
+    {t: "武隆天坑", acts: [{ti: "全天", s: "武隆天生三桥+地缝", d: "重庆北→武隆高铁1小时世界自然遗产"}]},
+    {t: "磁器口·索道", acts: [{ti: "上午", s: "磁器口古镇", d: "1号线直达陈麻花必买"}, {ti: "下午", s: "李子坝+鹅岭二厂", d: "轻轨穿楼+文艺拍照"}]},
+    {t: "川美·交通茶馆", acts: [{ti: "上午", s: "川美黄桷坪涂鸦街", d: "整条街都是涂鸦"}, {ti: "下午", s: "交通茶馆", d: "8元坐一下午老重庆味道"}]},
+    {t: "白象居收官", acts: [{ti: "上午", s: "白象居+皇冠大扶梯", d: "少年的你取景地"}, {ti: "下午", s: "采购返程", d: "火锅底料伴手礼"}]}
+  ],
+  metro: ["2号线单轨穿楼本身就是景点", "1号线：解放碑磁器口长江索道", "3号线：机场干线连接观音桥", "APP：渝畅行"],
+  pack: ["防滑运动鞋", "肠胃药+降火药", "雨伞", "充电宝", "薄外套"],
+  tips: ["导航常失灵多问路", "洪崖洞从11楼进才是正确方式", "火锅别选网红店"],
+  save: ["长江索道提前网上买票省排队", "武隆报纯玩团比自己去省心"],
+  costs: [
+    {i: "往返大交通", a: "700-1100"},
+    {i: "4晚住宿", a: "700-1000"},
+    {i: "餐饮", a: "400-600"},
+    {i: "门票", a: "350-500"},
+    {i: "市内交通", a: "150-250"}
+  ]
+},
+
+// 17.西安
+{
+  name: "西安",
+  slogan: "十三朝古都，华夏文明之源",
+  tags: ["历史厚重", "美食遍地", "文化之旅"],
+  matchTags: ["历史文化", "美食探店", "自然风光"],
+  budgetLevel: 2,
+  spots: [
+    {name: "西安北站", x: 50, y: 8, type: "s", metro: "2/4号线 北客站"},
+    {name: "钟鼓楼", x: 50, y: 40, type: "n", order: 1, metro: "2号线 钟楼"},
+    {name: "明城墙", x: 50, y: 50, type: "n", order: 2, metro: "2号线 永宁门"},
+    {name: "陕西历史博物馆", x: 62, y: 55, type: "n", order: 3, metro: "2/3号线 小寨"},
+    {name: "大雁塔", x: 68, y: 60, type: "n", order: 4, metro: "3/4号线 大雁塔"},
+    {name: "咸阳机场", x: 15, y: 20, type: "e", metro: "14号线 机场西"}
+  ],
+  hotels: [
+    {area: "钟楼/回民街", list: [
+      {n: "西安钟楼饭店", p: "¥600-900", b: "本地老牌", l: "高端"},
+      {n: "钟楼亚朵S", p: "¥400-600", b: "亚朵", l: "中端"},
+      {n: "北大街全季", p: "¥300-450", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·古城夜景", acts: [{ti: "下午", s: "抵达入住钟楼", d: "2号线北客站→钟楼"}, {ti: "晚上", s: "钟鼓楼+回民街", d: "泡馍肉夹馍吃起来"}]},
+    {t: "兵马俑·华清宫", acts: [{ti: "上午", s: "兵马俑博物馆", d: "9号线直达建议请讲解"}, {ti: "下午", s: "华清宫+骊山", d: "杨贵妃浴池西安事变旧址"}]},
+    {t: "陕博·大唐不夜城", acts: [{ti: "上午", s: "陕西历史博物馆", d: "提前3天抢票"}, {ti: "下午", s: "大雁塔", d: "唐僧译经之地可登塔俯瞰"}]},
+    {t: "华山一日", acts: [{ti: "全天", s: "西岳华山", d: "西安北→华山北30分钟西峰上北峰下"}]},
+    {t: "美食收官", acts: [{ti: "上午", s: "永兴坊", d: "陕西各地美食摔碗酒"}, {ti: "下午", s: "采购返程", d: "肉夹馍柿饼石榴汁伴手礼"}]}
+  ],
+  metro: ["2号线：南北主干线钟楼小寨", "3号线：东西线大雁塔", "4号线：火车站-大雁塔", "14号线：机场线", "APP：西安地铁"],
+  pack: ["舒适鞋", "充电宝", "薄外套", "身份证", "防晒"],
+  tips: ["兵马俑一定要请讲解不然看不懂", "陕博免费但票很难抢", "回民街主街贵往巷子里走", "华山注意安全量力而行"],
+  save: ["地铁便宜方便", "很多景点学生半价", "报一日游省心划算"],
+  costs: [
+    {i: "往返大交通", a: "600-1000"},
+    {i: "4晚住宿", a: "600-900"},
+    {i: "餐饮", a: "300-500"},
+    {i: "门票", a: "500-800"},
+    {i: "市内交通", a: "150-250"}
+  ]
+},
+
+// 18.昆明
+{
+  name: "昆明",
+  slogan: "春城昆明，四季如春",
+  tags: ["春城花都", "民族风情", "高原明珠"],
+  matchTags: ["自然风光", "历史文化", "亲子游乐"],
+  budgetLevel: 2,
+  spots: [
+    {name: "长水机场", x: 75, y: 15, type: "s", metro: "6号线 机场中心"},
+    {name: "翠湖", x: 40, y: 40, type: "n", order: 1, metro: "3号线 潘家湾"},
+    {name: "滇池", x: 35, y: 65, type: "n", order: 2, metro: "5号线 滇池学院"},
+    {name: "云南大学", x: 42, y: 38, type: "n", order: 3, metro: "3号线 潘家湾"},
+    {name: "石林", x: 80, y: 70, type: "n", order: 4, metro: "高铁20分钟"},
+    {name: "昆明南站", x: 85, y: 55, type: "e", metro: "1号线 昆明南"}
+  ],
+  hotels: [
+    {area: "翠湖/市中心", list: [
+      {n: "昆明翠湖宾馆", p: "¥600-1000", b: "本地老牌", l: "高端"},
+      {n: "翠湖亚朵", p: "¥300-500", b: "亚朵", l: "中端"},
+      {n: "南屏街全季", p: "¥250-400", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·翠湖夜景", acts: [{ti: "下午", s: "抵达入住翠湖", d: "市中心出行方便"}, {ti: "晚上", s: "翠湖+南屏街", d: "逛老街吃米线"}]},
+    {t: "滇池·西山", acts: [{ti: "上午", s: "滇池+海埂大坝", d: "看红嘴鸥冬季最佳"}, {ti: "下午", s: "西山龙门", d: "登龙门俯瞰滇池"}]},
+    {t: "石林一日", acts: [{ti: "全天", s: "石林风景区", d: "世界自然遗产阿诗玛的故乡"}]},
+    {t: "云南大学·民族村", acts: [{ti: "上午", s: "云南大学+翠湖", d: "百年名校银杏大道"}, {ti: "下午", s: "云南民族村", d: "了解云南26个民族"}]},
+    {t: "花市收官", acts: [{ti: "上午", s: "斗南花市", d: "亚洲最大鲜花市场超便宜"}, {ti: "下午", s: "采购返程", d: "鲜花饼普洱茶伴手礼"}]}
+  ],
+  metro: ["3号线：东西主干线", "1号线：南北+高铁南", "5号线：滇池方向", "6号线：机场线", "APP：昆明地铁"],
+  pack: ["薄外套（四季如春但早晚凉）", "防晒霜（紫外线强）", "舒适鞋", "雨伞"],
+  tips: ["昆明早晚温差大带外套", "紫外线强注意防晒", "斗南花市晚上去更便宜", "石林建议请讲解"],
+  save: ["很多公园免费", "消费普遍不高", "住宿便宜"],
+  costs: [
+    {i: "往返交通", a: "600-1200"},
+    {i: "4晚住宿", a: "500-800"},
+    {i: "餐饮", a: "300-500"},
+    {i: "门票", a: "300-500"},
+    {i: "市内交通", a: "100-200"}
+  ]
+},
+
+// 19.贵阳
+{
+  name: "贵阳",
+  slogan: "林城贵阳，避暑之都",
+  tags: ["避暑胜地", "喀斯特地貌", "苗族风情"],
+  matchTags: ["自然风光", "户外探险", "美食探店"],
+  budgetLevel: 1,
+  spots: [
+    {name: "龙洞堡机场", x: 60, y: 20, type: "s", metro: "2号线 龙洞堡机场"},
+    {name: "甲秀楼", x: 45, y: 45, type: "n", order: 1, metro: "2号线 甲秀楼"},
+    {name: "黔灵山", x: 30, y: 40, type: "n", order: 2, metro: "1号线 八鸽岩"},
+    {name: "青岩古镇", x: 25, y: 70, type: "n", order: 3, metro: "公交直达"},
+    {name: "黄果树瀑布", x: 10, y: 50, type: "n", order: 4, metro: "高铁30分钟"},
+    {name: "贵阳北站", x: 35, y: 25, type: "e", metro: "1号线 贵阳北站"}
+  ],
+  hotels: [
+    {area: "甲秀楼/市中心", list: [
+      {n: "贵阳凯宾斯基", p: "¥700-1100", b: "凯宾斯基", l: "高端"},
+      {n: "甲秀楼亚朵", p: "¥280-450", b: "亚朵", l: "中端"},
+      {n: "喷水池全季", p: "¥220-350", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·甲秀楼夜景", acts: [{ti: "下午", s: "抵达入住市中心", d: "住甲秀楼附近"}, {ti: "晚上", s: "甲秀楼+青云路夜市", d: "贵阳地标夜景吃小吃"}]},
+    {t: "黔灵山·青岩古镇", acts: [{ti: "上午", s: "黔灵山公园", d: "看猴子弘福寺祈福"}, {ti: "下午", s: "青岩古镇", d: "600年古镇吃卤猪脚"}]},
+    {t: "黄果树瀑布", acts: [{ti: "全天", s: "黄果树瀑布景区", d: "亚洲第一大瀑布陡坡塘天星桥"}]},
+    {t: "西江千户苗寨（可选）", acts: [{ti: "全天", s: "西江千户苗寨", d: "世界最大苗族聚居地"}]},
+    {t: "美食收官", acts: [{ti: "上午", s: "贵州省博物馆", d: "了解贵州历史民族文化"}, {ti: "下午", s: "采购返程", d: "茅台酒刺梨干老干妈伴手礼"}]}
+  ],
+  metro: ["1号线：南北主干线", "2号线：东西+机场", "APP：贵阳地铁"],
+  pack: ["薄外套（夏天也凉）", "雨伞（天无三日晴）", "舒适鞋", "防蚊液"],
+  tips: ["贵阳夏天真的很凉快避暑胜地", "天天下雨记得带伞", "黔灵山猴子别逗会抢东西", "酸汤鱼必吃"],
+  save: ["消费普遍偏低", "很多公园免费", "住宿便宜"],
+  costs: [
+    {i: "往返交通", a: "600-1200"},
+    {i: "4晚住宿", a: "400-700"},
+    {i: "餐饮", a: "250-400"},
+    {i: "门票", a: "300-500"},
+    {i: "市内交通", a: "150-300"}
+  ]
+},
+
+// 20.丽江
+{
+  name: "丽江",
+  slogan: "艳遇之都，纳西古城",
+  tags: ["古城风情", "雪山美景", "慢生活"],
+  matchTags: ["自然风光", "文艺打卡", "历史文化"],
+  budgetLevel: 3,
+  spots: [
+    {name: "三义机场", x: 20, y: 75, type: "s", metro: "机场大巴"},
+    {name: "丽江古城", x: 50, y: 50, type: "n", order: 1, metro: "公交/打车"},
+    {name: "玉龙雪山", x: 30, y: 20, type: "n", order: 2, metro: "包车/大巴"},
+    {name: "束河古镇", x: 40, y: 40, type: "n", order: 3, metro: "公交/打车"},
+    {name: "泸沽湖", x: 10, y: 30, type: "n", order: 4, metro: "包车4小时"},
+    {name: "丽江站", x: 65, y: 60, type: "e", metro: "公交直达"}
+  ],
+  hotels: [
+    {area: "丽江古城", list: [
+      {n: "丽江古城英迪格", p: "¥1000-1800", b: "洲际", l: "高端"},
+      {n: "古城亚朵", p: "¥350-600", b: "亚朵", l: "中端"},
+      {n: "古城特色客栈", p: "¥200-400", b: "本地", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·古城夜景", acts: [{ti: "下午", s: "抵达入住古城", d: "住古城内客栈体验感好"}, {ti: "晚上", s: "丽江古城夜游", d: "四方街酒吧街大水车"}]},
+    {t: "玉龙雪山一日", acts: [{ti: "全天", s: "玉龙雪山+蓝月谷", d: "冰川公园大索道蓝月谷拍照圣地"}]},
+    {t: "束河·白沙", acts: [{ti: "上午", s: "束河古镇", d: "比大研安静更原生态"}, {ti: "下午", s: "白沙古镇+玉湖村", d: "纳西族原始村落"}]},
+    {t: "泸沽湖两日（可选）", acts: [{ti: "全天", s: "泸沽湖", d: "东方女儿国摩梭族文化"}]},
+    {t: "古城收官", acts: [{ti: "上午", s: "黑龙潭公园", d: "拍雪山倒影"}, {ti: "下午", s: "采购返程", d: "普洱茶银器鲜花饼伴手礼"}]}
+  ],
+  metro: ["无地铁，公交+打车+包车", "景点分散建议包车或报团", "古城内步行可达", "APP：滴滴打车"],
+  pack: ["厚外套（即使夏天雪山也冷）", "防晒霜（紫外线超强）", "墨镜", "舒适鞋", "氧气瓶（可当地买）"],
+  tips: ["玉龙雪山大索道票提前抢", "古城维护费已取消", "泸沽湖路程远建议住一晚", "客栈别在酒吧街附近吵"],
+  save: ["报一日游比自己去划算", "住束河比大研便宜安静", "很多景点免费"],
+  costs: [
+    {i: "往返交通", a: "800-1800"},
+    {i: "4晚住宿", a: "600-1200"},
+    {i: "餐饮", a: "400-600"},
+    {i: "门票+索道", a: "600-1000"},
+    {i: "市内交通", a: "300-500"}
+  ]
+},
+
+// 21.大理
+{
+  name: "大理",
+  slogan: "风花雪月，苍洱大观",
+  tags: ["苍山洱海", "白族风情", "慢生活"],
+  matchTags: ["自然风光", "文艺打卡", "海岛度假"],
+  budgetLevel: 2,
+  spots: [
+    {name: "凤仪机场", x: 75, y: 60, type: "s", metro: "机场大巴"},
+    {name: "大理古城", x: 35, y: 40, type: "n", order: 1, metro: "公交/打车"},
+    {name: "洱海", x: 50, y: 50, type: "n", order: 2, metro: "骑行/包车"},
+    {name: "双廊", x: 70, y: 30, type: "n", order: 3, metro: "包车/大巴"},
+    {name: "苍山", x: 20, y: 35, type: "n", order: 4, metro: "索道上山"},
+    {name: "大理站", x: 60, y: 55, type: "e", metro: "公交直达"}
+  ],
+  hotels: [
+    {area: "大理古城", list: [
+      {n: "大理洱海天域英迪格", p: "¥1000-1800", b: "洲际", l: "高端"},
+      {n: "古城亚朵", p: "¥300-500", b: "亚朵", l: "中端"},
+      {n: "古城特色客栈", p: "¥150-350", b: "本地", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·古城夜景", acts: [{ti: "下午", s: "抵达入住古城", d: "住大理古城或洱海边"}, {ti: "晚上", s: "大理古城+人民路", d: "逛古城吃白族菜"}]},
+    {t: "环洱海一日", acts: [{ti: "全天", s: "环洱海骑行/包车", d: "才村喜洲双廊挖色小普陀"}]},
+    {t: "苍山·喜洲", acts: [{ti: "上午", s: "苍山索道", d: "洗马潭大索道俯瞰洱海"}, {ti: "下午", s: "喜洲古镇", d: "白族民居喜洲粑粑"}]},
+    {t: "双廊·南诏风情岛", acts: [{ti: "上午", s: "双廊古镇", d: "杨丽萍太阳宫月亮宫"}, {ti: "下午", s: "南诏风情岛", d: "洱海三岛之一"}]},
+    {t: "收官返程", acts: [{ti: "上午", s: "崇圣寺三塔", d: "大理标志千年古塔"}, {ti: "下午", s: "采购返程", d: "大理石雕乳扇雕梅伴手礼"}]}
+  ],
+  metro: ["无地铁，公交+打车+包车", "环洱海建议包车或租电动车", "古城内步行可达", "APP：滴滴打车"],
+  pack: ["防晒霜（紫外线超强）", "薄外套（早晚凉）", "舒适鞋", "墨镜帽子"],
+  tips: ["环洱海注意防晒紫外线超强", "双廊住宿贵但风景好", "洱海生态廊道只能步行骑行", "雨季6-9月带伞"],
+  save: ["很多景点免费", "住宿丰俭由人", "吃饭便宜"],
+  costs: [
+    {i: "往返交通", a: "700-1500"},
+    {i: "4晚住宿", a: "500-1000"},
+    {i: "餐饮", a: "300-500"},
+    {i: "门票", a: "300-500"},
+    {i: "市内交通", a: "200-400"}
+  ]
+},
+
+// 22.兰州
+{
+  name: "兰州",
+  slogan: "黄河之都，丝路重镇",
+  tags: ["黄河风情", "丝路文化", "牛肉面之乡"],
+  matchTags: ["历史文化", "美食探店", "自然风光"],
+  budgetLevel: 1,
+  spots: [
+    {name: "中川机场", x: 15, y: 10, type: "s", metro: "城际铁路 中川机场"},
+    {name: "中山桥", x: 50, y: 45, type: "n", order: 1, metro: "公交直达"},
+    {name: "白塔山", x: 48, y: 40, type: "n", order: 2, metro: "过中山桥即到"},
+    {name: "黄河母亲", x: 40, y: 55, type: "n", order: 3, metro: "公交直达"},
+    {name: "甘肃省博", x: 60, y: 45, type: "n", order: 4, metro: "公交直达"},
+    {name: "兰州西站", x: 30, y: 60, type: "e", metro: "1/2号线 西站北广场"}
+  ],
+  hotels: [
+    {area: "城关区/中山桥", list: [
+      {n: "兰州皇冠假日", p: "¥500-800", b: "洲际", l: "高端"},
+      {n: "中山桥亚朵", p: "¥280-420", b: "亚朵", l: "中端"},
+      {n: "西关十字全季", p: "¥220-350", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·黄河夜景", acts: [{ti: "下午", s: "抵达入住中山桥", d: "住城关区出行方便"}, {ti: "晚上", s: "中山桥夜景+黄河母亲", d: "黄河第一桥夜景"}]},
+    {t: "白塔山·省博", acts: [{ti: "上午", s: "白塔山公园", d: "登白塔俯瞰兰州全景"}, {ti: "下午", s: "甘肃省博物馆", d: "马踏飞燕必看"}]},
+    {t: "兴隆山一日", acts: [{ti: "全天", s: "兴隆山自然保护区", d: "陇右第一名山避暑胜地"}]},
+    {t: "水墨丹霞", acts: [{ti: "全天", s: "兰州水墨丹霞", d: "距离市区最近的丹霞地貌"}]},
+    {t: "牛肉面收官", acts: [{ti: "上午", s: "吃正宗牛肉面", d: "磨沟沿马子禄吾穆勒"}, {ti: "下午", s: "采购返程", d: "百合干牛肉干三泡台"}]}
+  ],
+  metro: ["1号线：东西主干线", "2号线：南北辅助线", "中川机场城际铁路", "景点公交覆盖", "APP：兰州地铁"],
+  pack: ["防晒霜", "薄外套（昼夜温差大）", "舒适鞋", "充电宝", "水杯"],
+  tips: ["牛肉面早上吃最正宗", "昼夜温差大带外套", "紫外线强注意防晒", "正宁路夜市别去太早"],
+  save: ["消费普遍偏低", "牛肉面8-15元一碗", "很多景点免费"],
+  costs: [
+    {i: "往返交通", a: "600-1200"},
+    {i: "4晚住宿", a: "400-700"},
+    {i: "餐饮", a: "250-400"},
+    {i: "门票", a: "150-300"},
+    {i: "市内交通", a: "100-200"}
+  ]
+},
+
+// 23.哈尔滨
+{
+  name: "哈尔滨",
+  slogan: "冰城夏都，东方莫斯科",
+  tags: ["冰雪世界", "俄式风情", "避暑胜地"],
+  matchTags: ["自然风光", "历史文化", "亲子游乐"],
+  budgetLevel: 2,
+  spots: [
+    {name: "太平机场", x: 20, y: 15, type: "s", metro: "机场大巴"},
+    {name: "中央大街", x: 50, y: 45, type: "n", order: 1, metro: "1号线 中央大街"},
+    {name: "圣索菲亚", x: 52, y: 42, type: "n", order: 2, metro: "1号线 兆麟街"},
+    {name: "松花江", x: 48, y: 38, type: "n", order: 3, metro: "步行可达"},
+    {name: "冰雪大世界", x: 30, y: 25, type: "n", order: 4, metro: "2号线 冰雪大世界"},
+    {name: "哈尔滨西站", x: 25, y: 65, type: "e", metro: "3号线 哈尔滨西站"}
+  ],
+  hotels: [
+    {area: "中央大街", list: [
+      {n: "哈尔滨香格里拉", p: "¥700-1200", b: "香格里拉", l: "高端"},
+      {n: "中央大街亚朵", p: "¥300-500", b: "亚朵", l: "中端"},
+      {n: "兆麟街全季", p: "¥250-400", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·中央大街夜景", acts: [{ti: "下午", s: "抵达入住中央大街", d: "住最繁华地段"}, {ti: "晚上", s: "中央大街+圣索菲亚", d: "俄式建筑夜景吃马迭尔冰棍"}]},
+    {t: "太阳岛·松花江", acts: [{ti: "上午", s: "太阳岛风景区", d: "夏季避暑冬季雪博会"}, {ti: "下午", s: "松花江", d: "夏天坐船冬天冰上活动"}]},
+    {t: "冰雪大世界", acts: [{ti: "全天", s: "冰雪大世界", d: "冬季限定，建议下午去玩到晚上"}]},
+    {t: "亚布力滑雪（可选）", acts: [{ti: "全天", s: "亚布力滑雪", d: "中国滑雪胜地冬季必去"}]},
+    {t: "美食收官", acts: [{ti: "上午", s: "果戈里大街", d: "俄式风情街"}, {ti: "下午", s: "采购返程", d: "红肠大列巴俄罗斯巧克力"}]}
+  ],
+  metro: ["1号线：东西主干线", "2号线：松北-香坊，太阳岛-冰雪大世界", "3号线：环线", "APP：哈尔滨地铁"],
+  pack: ["冬季：羽绒服+帽子+手套+厚鞋", "夏季：薄外套+长裤（凉爽）", "防晒霜", "充电宝", "暖宝宝（冬季）"],
+  tips: ["冰雪大世界12月底-2月中开放", "冬天手机容易冻关机贴暖宝宝", "东北菜量大别点太多", "中央大街冰棍冬天也卖"],
+  save: ["夏季是淡季住宿便宜", "很多景点免费", "吃饭便宜量大"],
+  costs: [
+    {i: "往返交通", a: "800-1500"},
+    {i: "4晚住宿", a: "500-1000"},
+    {i: "餐饮", a: "300-500"},
+    {i: "门票", a: "300-600"},
+    {i: "市内交通", a: "100-200"}
+  ]
+},
+
+// 24.大连
+{
+  name: "大连",
+  slogan: "浪漫之都，北方明珠",
+  tags: ["海滨城市", "俄日风情", "海鲜美食"],
+  matchTags:  [{name: "周水子机场", x: 30, y: 20, type: "s", metro: "2号线 机场"},
+    {name: "星海广场", x: 35, y: 50, type: "n", order: 1, metro: "1号线 星海广场"},
+    {name: "老虎滩", x: 60, y: 45, type: "n", order: 2, metro: "公交直达"},
+    {name: "金石滩", x: 85, y: 15, type: "n", order: 3, metro: "3号线 金石滩"},
+    {name: "旅顺", x: 10, y: 40, type: "n", order: 4, metro: "公交/大巴"},
+    {name: "大连北站", x: 55, y: 10, type: "e", metro: "1/2号线 大连北站"}
+  ],
+  hotels: [
+    {area: "中山广场/青泥洼", list: [
+      {n: "大连香格里拉", p: "¥700-1200", b: "香格里拉", l: "高端"},
+      {n: "中山广场亚朵", p: "¥300-500", b: "亚朵", l: "中端"},
+      {n: "青泥洼全季", p: "¥250-400", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·星海广场夜景", acts: [{ti: "下午", s: "抵达入住中山广场", d: "市中心交通便利"}, {ti: "晚上", s: "星海广场+跨海大桥", d: "亚洲最大城市广场夜景"}]},
+    {t: "老虎滩·棒棰岛", acts: [{ti: "上午", s: "老虎滩海洋公园", d: "5A景区极地馆必看"}, {ti: "下午", s: "棒棰岛", d: "国宾馆海岸线风景绝美"}]},
+    {t: "金石滩一日", acts: [{ti: "全天", s: "金石滩国家旅游度假区", d: "3号线直达，发现王国/地质公园"}]},
+    {t: "旅顺一日", acts: [{ti: "全天", s: "旅顺军港+白玉山", d: "近代史见证军港之夜"}]},
+    {t: "俄罗斯风情街收官", acts: [{ti: "上午", s: "俄罗斯风情街+东港", d: "俄式建筑威尼斯水城"}, {ti: "下午", s: "采购返程", d: "海鲜干货樱桃伴手礼"}]}
+  ],
+  metro: ["1号线：南北主干线", "2号线：机场-青泥洼", "3号线：金石滩快轨", "APP：大连地铁e出行"],
+  pack: ["防晒霜", "舒适鞋", "薄外套（海边风大）", "雨伞", "充电宝"],
+  tips: ["海边风大带外套", "海鲜别在景区吃", "金石滩建议玩一整天", "旅顺历史厚重建议请讲解"],
+  save: ["很多海滨公园免费", "地铁覆盖主要景点", "住宿比青岛便宜"],
+  costs: [
+    {i: "往返交通", a: "500-900"},
+    {i: "4晚住宿", a: "500-900"},
+    {i: "餐饮", a: "350-550"},
+    {i: "门票", a: "300-500"},
+    {i: "市内交通", a: "100-200"}
+  ]
+},
+
+// 25.拉萨
+{
+  name: "拉萨",
+  slogan: "日光圣城，雪域天堂",
+  tags: ["高原圣地", "藏传佛教", "自然风光"],
+  matchTags: ["自然风光", "历史文化", "户外探险"],
+  budgetLevel: 3,
+  spots: [
+    {name: "贡嘎机场", x: 15, y: 75, type: "s", metro: "机场大巴"},
+    {name: "布达拉宫", x: 50, y: 40, type: "n", order: 1, metro: "公交直达"},
+    {name: "大昭寺", x: 55, y: 45, type: "n", order: 2, metro: "步行可达"},
+    {name: "八廓街", x: 53, y: 47, type: "n", order: 3, metro: "步行可达"},
+    {name: "纳木错", x: 30, y: 10, type: "n", order: 4, metro: "包车4小时"},
+    {name: "拉萨站", x: 70, y: 55, type: "e", metro: "公交直达"}
+  ],
+  hotels: [
+    {area: "布达拉宫/大昭寺", list: [
+      {n: "拉萨瑞吉度假酒店", p: "¥1200-2000", b: "万豪", l: "高端"},
+      {n: "布达拉宫亚朵", p: "¥400-650", b: "亚朵", l: "中端"},
+      {n: "大昭寺全季", p: "¥300-500", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·适应高原", acts: [{ti: "下午", s: "抵达入住市区", d: "当天不洗澡不剧烈运动"}, {ti: "晚上", s: "布达拉宫广场夜景", d: "药王山拍50元人民币背景"}]},
+    {t: "布达拉宫·大昭寺", acts: [{ti: "上午", s: "布达拉宫", d: "提前7天预约，世界文化遗产"}, {ti: "下午", s: "大昭寺+八廓街", d: "藏传佛教圣地转经道"}]},
+    {t: "纳木错一日", acts: [{ti: "全天", s: "纳木错圣象天门", d: "西藏三大圣湖之一，海拔4700"}]},
+    {t: "羊卓雍措", acts: [{ti: "全天", s: "羊卓雍措", d: "碧玉般的圣湖，盘山公路绝美"}]},
+    {t: "色拉寺·收官", acts: [{ti: "上午", s: "色拉寺辩经", d: "下午3点辩经很有特色"}, {ti: "下午", s: "采购返程", d: "藏红花牦牛肉干酥油茶伴手礼"}]}
+  ],
+  metro: ["无地铁，公交+打车+包车为主", "景点分散建议报纯玩团或包车", "市区内打车便宜", "APP：高德地图"],
+  pack: ["厚外套（即使夏天也冷）", "防晒霜SPF50+", "墨镜帽子", "红景天（提前吃）", "氧气瓶（当地买）"],
+  tips: ["刚到不要洗澡洗头避免高反", "布达拉宫提前7天抢票", "不要随意拍当地人先征得同意", "带点葡萄糖缓解高反"],
+  save: ["市区景点步行可达", "报团比自己去划算", "很多寺庙门票不贵"],
+  costs: [
+    {i: "往返大交通", a: "1500-2500"},
+    {i: "4晚住宿", a: "800-1500"},
+    {i: "餐饮", a: "400-600"},
+    {i: "门票", a: "500-800"},
+    {i: "其他", a: "300-300"}
+  ]
+},
+
+// 26.乌鲁木齐
+{
+  name: "乌鲁木齐",
+  slogan: "西域明珠，丝路重镇",
+  tags: ["西域风情", "民族特色", "天山美景"],
+  matchTags: ["自然风光", "历史文化", "户外探险"],
+  budgetLevel: 2,
+  spots: [
+    {name: "地窝堡机场", x: 20, y: 20, type: "s", metro: "1号线 国际机场"},
+    {name: "国际大巴扎", x: 55, y: 50, type: "n", order: 1, metro: "1号线 二道桥"},
+    {name: "红山公园", x: 45, y: 40, type: "n", order: 2, metro: "1号线 南门"},
+    {name: "天山天池", x: 60, y: 15, type: "n", order: 3, metro: "大巴1.5小时"},
+    {name: "新疆维吾尔自治区博物馆", x: 40, y: 45, type: "n", order: 4, metro: "1号线 西北路"},
+    {name: "乌鲁木齐站", x: 30, y: 35, type: "e", metro: "2号线 乌鲁木齐站"}
+  ],
+  hotels: [
+    {area: "友好路/红山", list: [
+      {n: "乌鲁木齐希尔顿", p: "¥800-1400", b: "希尔顿", l: "高端"},
+      {n: "友好路亚朵", p: "¥300-500", b: "亚朵", l: "中端"},
+      {n: "红山全季", p: "¥250-400", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·大巴扎夜景", acts: [{ti: "下午", s: "抵达入住市区", d: "住友好路交通便利"}, {ti: "晚上", s: "国际大巴扎", d: "世界最大巴扎西域风情"}]},
+    {t: "天山天池一日", acts: [{ti: "全天", s: "天山天池", d: "瑶池仙境，雪峰倒映"}]},
+    {t: "博物馆·红山", acts: [{ti: "上午", s: "新疆维吾尔自治区博物馆", d: "干尸五星出东方锦护臂"}, {ti: "下午", s: "红山公园", d: "俯瞰乌鲁木齐全景"}]},
+    {t: "南山牧场", acts: [{ti: "全天", s: "南山牧场", d: "哈萨克族风情骑马草原"}]},
+    {t: "美食收官", acts: [{ti: "上午", s: "领馆巷美食", d: "手抓饭烤包子大盘鸡"}, {ti: "下午", s: "采购返程", d: "葡萄干巴旦木红枣伴手礼"}]}
+  ],
+  metro: ["1号线：南北主干线，机场-三屯碑", "2号线：高铁站方向", "APP：乌鲁木齐地铁"],
+  pack: ["防晒霜（紫外线强）", "薄外套（昼夜温差大）", "舒适鞋", "充电宝", "水杯"],
+  tips: ["新疆与内地有2小时时差", "昼夜温差大带外套", "安检多带好身份证", "买东西论公斤问清楚"],
+  save: ["美食量大实惠", "市区景点不贵", "住宿性价比高"],
+  costs: [
+    {i: "往返交通", a: "1000-2000"},
+    {i: "4晚住宿", a: "500-900"},
+    {i: "餐饮", a: "350-550"},
+    {i: "门票", a: "300-500"},
+    {i: "市内交通", a: "150-250"}
+  ]
+},
+
+// 27.呼和浩特
+{
+  name: "呼和浩特",
+  slogan: "青城塞外，草原明珠",
+  tags: ["草原风情", "蒙古族文化", "塞上风光"],
+  matchTags: ["自然风光", "历史文化", "户外探险"],
+  budgetLevel: 1,
+  spots: [
+    {name: "白塔机场", x: 70, y: 20, type: "s", metro: "1号线 坝堰（机场）"},
+    {name: "大召寺", x: 45, y: 50, type: "n", order: 1, metro: "2号线 诺和木勒"},
+    {name: "塞上老街", x: 47, y: 52, type: "n", order: 2, metro: "步行可达"},
+    {name: "内蒙古博物院", x: 55, y: 35, type: "n", order: 3, metro: "1号线 内蒙古博物院"},
+    {name: "希拉穆仁草原", x: 30, y: 10, type: "n", order: 4, metro: "大巴2小时"},
+    {name: "呼和浩特东站", x: 65, y: 30, type: "e", metro: "1号线 呼和浩特东站"}
+  ],
+  hotels: [
+    {area: "中山路/大召寺", list: [
+      {n: "呼和浩特香格里拉", p: "¥600-1000", b: "香格里拉", l: "高端"},
+      {n: "中山路亚朵", p: "¥280-420", b: "亚朵", l: "中端"},
+      {n: "大召寺全季", p: "¥220-350", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·塞上老街夜景", acts: [{ti: "下午", s: "抵达入住市区", d: "住中山路逛吃方便"}, {ti: "晚上", s: "大召寺+塞上老街", d: "藏传佛教寺庙明清老街"}]},
+    {t: "希拉穆仁草原一日", acts: [{ti: "全天", s: "希拉穆仁草原", d: "骑马住蒙古包看篝火晚会"}]},
+    {t: "博物院·昭君墓", acts: [{ti: "上午", s: "内蒙古博物院", d: "了解蒙古族历史恐龙化石"}, {ti: "下午", s: "昭君博物院", d: "昭君出塞历史故事"}]},
+    {t: "响沙湾（可选）", acts: [{ti: "全天", s: "响沙湾沙漠", d: "库布齐沙漠滑沙骑骆驼"}]},
+    {t: "美食收官", acts: [{ti: "上午", s: "吃蒙餐", d: "手把肉烧麦奶茶"}, {ti: "下午", s: "采购返程", d: "牛肉干奶片奶酪伴手礼"}]}
+  ],
+  metro: ["1号线：东西主干线，机场-东站", "2号线：南北主干线", "APP：青城地铁"],
+  pack: ["薄外套（草原风大）", "防晒霜", "舒适鞋", "充电宝", "防蚊液（夏季）"],
+  tips: ["草原早晚温差大带厚外套", "骑马注意安全听牧民指挥", "蒙餐量大别点太多", "尊重蒙古族习俗"],
+  save: ["消费普遍不高", "住宿便宜", "美食实惠量大"],
+  costs: [
+    {i: "往返交通", a: "600-1200"},
+    {i: "4晚住宿", a: "400-700"},
+    {i: "餐饮", a: "300-450"},
+    {i: "门票", a: "200-400"},
+    {i: "市内交通", a: "100-200"}
+  ]
+},
+
+// 28.银川
+{
+  name: "银川",
+  slogan: "塞上江南，西夏古都",
+  tags: ["西夏文化", "大漠风光", "塞上江南"],
+  matchTags: ["历史文化", "自然风光", "户外探险"],
+  budgetLevel: 1,
+  spots: [
+    {name: "河东机场", x: 75, y: 40, type: "s", metro: "河东机场"},
+    {name: "西夏王陵", x: 25, y: 35, type: "n", order: 1, metro: "旅游专线"},
+    {name: "镇北堡西部影城", x: 20, y: 25, type: "n", order: 2, metro: "旅游专线"},
+    {name: "沙湖", x: 40, y: 10, type: "n", order: 3, metro: "大巴1小时"},
+    {name: "鼓楼", x: 55, y: 50, type: "n", order: 4, metro: "公交直达"},
+    {name: "银川站", x: 45, y: 55, type: "e", metro: "公交直达"}
+  ],
+  hotels: [
+    {area: "兴庆区/鼓楼", list: [
+      {n: "银川JW万豪", p: "¥700-1100", b: "万豪", l: "高端"},
+      {n: "鼓楼亚朵", p: "¥260-400", b: "亚朵", l: "中端"},
+      {n: "解放街全季", p: "¥200-320", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·鼓楼夜景", acts: [{ti: "下午", s: "抵达入住兴庆区", d: "市中心出行方便"}, {ti: "晚上", s: "鼓楼+怀远夜市", d: "逛夜市吃辣条辣糊糊"}]},
+    {t: "西夏王陵·镇北堡", acts: [{ti: "上午", s: "西夏王陵", d: "东方金字塔神秘西夏文化"}, {ti: "下午", s: "镇北堡西部影城", d: "大话西游取景地"}]},
+    {t: "沙湖一日", acts: [{ti: "全天", s: "沙湖生态旅游区", d: "沙水相依塞上明珠"}]},
+    {t: "水洞沟", acts: [{ti: "全天", s: "水洞沟", d: "旧石器时代遗址藏兵洞"}]},
+    {t: "美食收官", acts: [{ti: "上午", s: "宁夏博物馆", d: "了解西夏历史"}, {ti: "下午", s: "采购返程", d: "枸杞贺兰石滩羊特产"}]}
+  ],
+  metro: ["暂无地铁，公交+打车+旅游专线", "景点分散建议报一日游", "市区打车便宜", "APP：高德地图"],
+  pack: ["防晒霜", "薄外套（昼夜温差大）", "舒适鞋", "口罩（防风沙）", "充电宝"],
+  tips: ["春季多风沙带口罩", "昼夜温差大带外套", "西夏王陵建议请讲解", "枸杞正宗可以买"],
+  save: ["消费偏低", "住宿便宜", "报一日游省心划算"],
+  costs: [
+    {i: "往返交通", a: "500-1000"},
+    {i: "4晚住宿", a: "350-600"},
+    {i: "餐饮", a: "250-400"},
+    {i: "门票", a: "300-500"},
+    {i: "市内交通", a: "150-250"}
+  ]
+},
+
+// 29.西宁
+{
+  name: "西宁",
+  slogan: "夏都西宁，青藏门户",
+  tags: ["高原夏都", "藏回风情", "青藏起点"],
+  matchTags: ["自然风光", "历史文化", "户外探险"],
+  budgetLevel: 1,
+  spots: [
+    {name: "曹家堡机场", x: 70, y: 30, type: "s", metro: "机场大巴"},
+    {name: "塔尔寺", x: 30, y: 55, type: "n", order: 1, metro: "公交直达"},
+    {name: "东关清真大寺", x: 55, y: 45, type: "n", order: 2, metro: "公交直达"},
+    {name: "青海湖", x: 10, y: 20, type: "n", order: 3, metro: "大巴2小时"},
+    {name: "茶卡盐湖", x: 5, y: 10, type: "n", order: 4, metro: "大巴4小时"},
+    {name: "西宁站", x: 60, y: 40, type: "e", metro: "公交直达"}
+  ],
+  hotels: [
+    {area: "城东区/东关", list: [
+      {n: "西宁新华联索菲特大酒店", p: "¥700-1200", b: "雅高", l: "高端"},
+      {n: "东关亚朵", p: "¥260-420", b: "亚朵", l: "中端"},
+      {n: "大十字全季", p: "¥200-330", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·适应高原", acts: [{ti: "下午", s: "抵达入住市区", d: "海拔2200米一般无高反"}, {ti: "晚上", s: "莫家街美食", d: "吃手抓羊肉酿皮酸奶"}]},
+    {t: "塔尔寺·东关大寺", acts: [{ti: "上午", s: "塔尔寺", d: "藏传佛教格鲁派六大寺之一"}, {ti: "下午", s: "东关清真大寺", d: "西北最大清真寺之一"}]},
+    {t: "青海湖一日", acts: [{ti: "全天", s: "青海湖二郎剑", d: "中国最大咸水湖油菜花海7-8月"}]},
+    {t: "茶卡盐湖", acts: [{ti: "全天", s: "茶卡盐湖天空之镜", d: "穿红裙子拍照绝美"}]},
+    {t: "美食收官", acts: [{ti: "上午", s: "青海省博物馆", d: "了解青海历史文化"}, {ti: "下午", s: "采购返程", d: "冬虫夏草牦牛肉干青稞酒"}]}
+  ],
+  metro: ["暂无地铁，公交+打车+旅游大巴", "青海湖茶卡建议报两日游", "市区打车便宜", "APP：高德地图"],
+  pack: ["厚外套（湖边很冷）", "防晒霜SPF50+", "墨镜帽子", "舒适鞋", "充电宝"],
+  tips: ["青海湖即使夏天也很冷带厚外套", "茶卡盐湖晴天去才好看", "尊重当地宗教习俗", "带点肠胃药"],
+  save: ["市区消费不高", "报团比自己去划算", "住宿便宜"],
+  costs: [
+    {i: "往返交通", a: "700-1400"},
+    {i: "4晚住宿", a: "400-700"},
+    {i: "餐饮", a: "300-450"},
+    {i: "门票", a: "300-500"},
+    {i: "市内交通", a: "200-400"}
+  ]
+},
+
+// 30.海口
+{
+  name: "海口",
+  slogan: "椰城海口，南海明珠",
+  tags: ["热带海滨", "椰风海韵", "历史文化"],
+  matchTags: ["海岛度假", "美食探店", "历史文化"],
+  budgetLevel: 2,
+  spots: [
+    {name: "美兰机场", x: 70, y: 20, type: "s", metro: "1号线 美兰机场"},
+    {name: "骑楼老街", x: 45, y: 45, type: "n", order: 1, metro: "公交直达"},
+    {name: "假日海滩", x: 20, y: 40, type: "n", order: 2, metro: "公交直达"},
+    {name: "火山口", x: 30, y: 60, type: "n", order: 3, metro: "公交直达"},
+    {name: "东寨港红树林", x: 80, y: 35, type: "n", order: 4, metro: "大巴1小时"},
+    {name: "海口东站", x: 60, y: 50, type: "e", metro: "1号线 海口东站"}
+  ],
+  hotels: [
+    {area: "龙华区/骑楼老街", list: [
+      {n: "海口希尔顿", p: "¥700-1200", b: "希尔顿", l: "高端"},
+      {n: "骑楼老街亚朵", p: "¥300-500", b: "亚朵", l: "中端"},
+      {n: "国贸全季", p: "¥250-400", b: "华住", l: "舒适"}
+    ]}
+  ],
+  itinerary: [
+    {t: "抵达·骑楼老街夜景", acts: [{ti: "下午", s: "抵达入住市区", d: "住国贸或骑楼附近"}, {ti: "晚上", s: "骑楼老街+钟楼", d: "百年南洋建筑吃清补凉"}]},
+    {t: "假日海滩·火山口", acts: [{ti: "上午", s: "假日海滩", d: "西海岸最长海滩"}, {ti: "下午", s: "火山口国家地质公园", d: "中国雷琼世界地质公园"}]},
+    {t: "东寨港红树林", acts: [{ti: "全天", s: "东寨港红树林", d: "海上森林坐船游览"}]},
+    {t: "冯小刚电影公社", acts: [{ti: "全天", s: "观澜湖华谊冯小刚电影公社", d: "民国风南洋风拍照圣地"}]},
+    {t: "美食收官", acts: [{ti: "上午", s: "海南省博物馆", d: "了解海南历史文化"}, {ti: "下午", s: "采购返程", d: "椰子糖胡椒粉文昌鸡特产"}]}
+  ],
+  metro: ["1号线：东西主干线，机场-东站", "公交覆盖主要景点", "APP：海口地铁"],
+  pack: ["防晒霜SPF50+", "泳衣", "薄外套（空调房冷）", "雨伞", "防蚊液"],
+  tips: ["紫外线强注意防晒", "海鲜别在景区吃", "清补凉必吃", "冬季是旺季"],
+  save: ["消费比三亚低很多", "很多公园免费", "住宿性价比高"],
+  costs: [
+    {i: "往返交通", a: "600-1200"},
+    {i: "4晚住宿", a: "500-900"},
+    {i: "餐饮", a: "350-550"},
+    {i: "门票", a: "200-400"},
+    {i: "市内交通", a: "100-200"}
+  ]
+}
+];
+
+// ===== 全局变量 =====
+var dayNum = 5;
+var isRunning = false;
+
+// ===== 天数选择 =====
+function setDay(el, num) {
+  document.querySelectorAll('.day').forEach(d => d.classList.remove('on'));
+  el.classList.add('on');
+  dayNum = num;
+}
+
+// ===== 标签切换 =====
+function toggleTag(el) {
+  el.classList.toggle('on');
+}
+
+// ===== 随机选城市算法 =====
+function randomPick() {
+  var budgetVal = Number(document.getElementById('budget').value);
+  var tv = document.getElementById('travelers');
+  var tOpt = tv.options[tv.selectedIndex];
+  var pNum = Number(tOpt.dataset.num) || 1;
+  var peopleType = tv.value;
+  var peopleLabel = tOpt.dataset.name || "";
+  var depCity = document.getElementById('depCity').value.trim() || "南通";
+
+  var selTags = [];
+  document.querySelectorAll('#tagBox .tag.on').forEach(t => {
+    selTags.push(t.innerText.replace(/^./, '').trim());
+  });
+
+  var bestCity = null;
+  var bestScore = -999;
+
+  cities.forEach(function(city) {
+    var score = 0;
+    var totalBudget = budgetVal * pNum;
+    var cityTotal = city.budgetLevel * 1500 * pNum;
+    var tol = pNum <= 2 ? 1200 * pNum : 800 * pNum + 800;
+    if (Math.abs(cityTotal - totalBudget) < tol) score += 0.22;
+
+    var matchCount = 0;
+    city.matchTags.forEach(function(tag) {
+      if (selTags.includes(tag)) matchCount++;
+    });
+    score += matchCount * 0.15;
+
+    var mt = city.matchTags;
+    if (peopleType === 'family') {
+      if (mt.includes('亲子游乐')) score += 0.12;
+      if (mt.includes('美食探店')) score += 0.06;
+    }
+    if (peopleType === 'elders') {
+      if (mt.includes('历史文化')) score += 0.10;
+      if (mt.includes('自然风光')) score += 0.06;
+    }
+    if (peopleType === 'friends') {
+      if (mt.includes('海岛度假')) score += 0.10;
+      if (mt.includes('户外探险')) score += 0.08;
+    }
+    if (peopleType === 'solo') {
+      if (mt.includes('文艺打卡')) score += 0.08;
+      if (mt.includes('历史文化')) score += 0.06;
+    }
+
+    score += Math.random() * 0.15;
+    if (score > bestScore) {
+      bestScore = score;
+      bestCity = city;
+    }
+  });
+
+  return { city: bestCity, pNum: pNum, peopleLabel: peopleLabel, depCity: depCity, peopleType: peopleType };
+}
+
+// ===== 渲染结果 =====
+function renderData(data) {
+  var city = data.city;
+  var pNum = data.pNum;
+  var peopleLabel = data.peopleLabel;
+  var depCity = data.depCity;
+  var dayRate = dayNum / 5;
+
+  document.getElementById('rName').innerText = city.name;
+  document.getElementById('rSlogan').innerText = city.slogan;
+
+  var tagsHtml = "";
+  city.tags.forEach(t => tagsHtml += '<span class="dest-tag">'+ t +'</span>');
+  document.getElementById('rTags').innerHTML = tagsHtml;
+
+  var baseTotal = 0;
+  city.costs.forEach(function(item) {
+    var arr = item.a.split("-").map(Number);
+    var arrMin = arr[0] || 0;
+    var arrMax = arr[1] ?? arrMin;
+    baseTotal += (arrMin + arrMax) / 2;
+  });
+  var perEst = Math.round(baseTotal * dayRate);
+  var allEst = Math.round(perEst * pNum);
+
+  var ovHtml = `
+    <div class="ov-item"><div class="n">${dayNum}天${dayNum-1}晚</div><div class="l">旅行天数</div></div>
+    <div class="ov-item"><div class="n">${peopleLabel}</div><div class="l">出行人群</div></div>
+    <div class="ov-item">
+      <div class="n">¥${perEst} × ${pNum}</div>
+      <div class="l">人均估算 × 人数</div>
+      <div style="font-size:12px;color:#64748b;margin-top:2px">合计约 ¥${allEst}</div>
+    </div>
+    <div class="ov-item"><div class="n">${depCity}出发</div><div class="l">出发城市</div></div>
+  `;
+  document.getElementById('rOv').innerHTML = ovHtml;
+
+  var mapHtml = '<div class="map-bg"></div>';
+  city.spots.forEach(function(s) {
+    var showSeq = (s.type === 'n' && s.order && s.order <= dayNum) ? s.order : '';
+    mapHtml += `
+      <div class="point ${s.type}" style="left:${s.x}%;top:${s.y}%">
+        ${showSeq ? '<span class="seq">'+ showSeq +'</span>' : ''}
+        <div class="lb">${s.name}<br>${s.metro}</div>
+      </div>
+    `;
+  });
+  document.getElementById('rMap').innerHTML = mapHtml;
+
+  // 行程：不足dayNum天自动补自由延展日
+  var showDays = city.itinerary.slice(0, dayNum);
+  while (showDays.length < dayNum) {
+    var d = showDays.length + 1;
+    showDays.push({ 
+      t: `第${d}天 · 自由延展`, 
+      acts: [{ ti: "全天", s: "可根据体力安排周边或休整", d: "参考"+city.name+"本地玩法自行探索" }] 
+    });
+  }
+
+  var itiHtml = "";
+  showDays.forEach(function(day, idx) {
+    var actsHtml = "";
+    day.acts.forEach(function(a) {
+      actsHtml += `<div class="tl"><div class="t">${a.ti} · ${a.s}</div><div class="d">${a.d}</div></div>`;
+    });
+    itiHtml += `
+      <div class="day-card">
+        <div class="day-title">第${idx+1}天 · ${day.t}</div>
+        ${actsHtml}
+      </div>
+    `;
+  });
+  document.getElementById('rIti').innerHTML = itiHtml;
+
+  var hotelHtml = "";
+  city.hotels.forEach(function(h) {
+    var listHtml = "";
+    h.list.forEach(function(l) {
+      listHtml += `
+        <div class="hotel">
+          <span class="p">${l.p}</span>
+          <div class="n">${l.n} <span style="color:#64748b;font-size:12px">${l.b} · ${l.l}</span></div>
+        </div>
+      `;
+    });
+    hotelHtml += `<div style="margin-bottom:8px;font-weight:bold;font-size:13px">📍 ${h.area}</div>${listHtml}`;
+  });
+  document.getElementById('rHotel').innerHTML = hotelHtml;
+
+  var metroHtml = "";
+  city.metro.forEach(m => metroHtml += m +"<br>");
+  document.getElementById('rMetro').innerHTML = metroHtml;
+
+  var guideHtml = `
+    <div class="col">
+      <h4>🎒 必备物品</h4>
+      <ul>${city.pack.map(p => '<li>'+ p +'</li>').join('')}</ul>
+    </div>
+    <div class="col">
+      <h4>💡 实用贴士</h4>
+      <ul>${city.tips.map(p => '<li>'+ p +'</li>').join('')}</ul>
+    </div>
+    <div class="col">
+      <h4>💰 省钱技巧</h4>
+      <ul>${city.save.map(p => '<li>'+ p +'</li>').join('')}</ul>
+    </div>
+  `;
+  document.getElementById('rGuide').innerHTML = guideHtml;
+
+  var costHtml = "";
+  var totalMin = 0, totalMax = 0;
+  city.costs.forEach(function(item) {
+    var parts = item.a.split("-").map(Number);
+    var minP = parts[0] || 0;
+    var maxP = parts[1] ?? minP;
+    var showMin = Math.round(minP * dayRate);
+    var showMax = Math.round(maxP * dayRate);
+    totalMin += showMin;
+    totalMax += showMax;
+    costHtml += `<div class="cost-item"><span>${item.i}（单人${dayNum}天）</span><span>¥${showMin} - ¥${showMax}</span></div>`;
+  });
+  costHtml += `<div class="cost-total"><span>人均总计（${dayNum}天）</span><span class="p">¥${totalMin} - ¥${totalMax}</span></div>`;
+  costHtml += `<div class="cost-total" style="font-size:13px;color:#64748b"><span>${peopleLabel}总预算估算（${dayNum}天）</span><span>¥${Math.round(totalMin*pNum)} - ¥${Math.round(totalMax*pNum)}</span></div>`;
+  document.getElementById('rCost').innerHTML = costHtml;
+}
+
+// ===== 主流程（防连点锁） =====
+function startGame() {
+  if (isRunning) return;
+  isRunning = true;
+
+  document.getElementById('inputSec').style.display = 'none';
+  document.getElementById('resultSec').classList.remove('show');
+  document.getElementById('animSec').style.display = 'flex';
+
+  var box = document.getElementById('box');
+  var text = document.getElementById('animText');
+  var texts = ["正在匹配你的出行偏好…", "正在筛选30座目的地…", "正在生成专属行程…", "马上揭晓…"];
+  var idx = 0;
+
+  var shakeTimer = setInterval(function() {
+    box.classList.toggle('shake');
+  }, 250);
+
+  var textTimer = setInterval(function() {
+    idx++;
+    if (idx < texts.length) text.innerText = texts[idx];
+  }, 600);
+
+  setTimeout(function() {
+    clearInterval(shakeTimer);
+    clearInterval(textTimer);
+    box.classList.remove('shake');
+
+    var data = randomPick();
+    renderData(data);
+
+    document.getElementById('animSec').style.display = 'none';
+    document.getElementById('resultSec').classList.add('show');
+    isRunning = false;
+  }, 2200);
+}
+
+// ===== 重开 =====
+function retry() {
+  isRunning = false;
+  document.getElementById('inputSec').style.display = 'block';
+  document.getElementById('animSec').style.display = 'none';
+  document.getElementById('resultSec').classList.remove('show');
+}
+
+// ===== 保存方案（localStorage版，最多存10条） =====
+function savePlan() {
+  var el = document.getElementById('rName');
+  if (!el) return;
+  var plan = { 
+    name: el.innerText, 
+    slogan: document.getElementById('rSlogan').innerText, 
+    time: new Date().toLocaleString() 
+  };
+  var list = JSON.parse(localStorage.getItem('travelPlans') || '[]');
+  list.unshift(plan);
+  localStorage.setItem('travelPlans', JSON.stringify(list.slice(0,10)));
+  alert("方案「"+ plan.name +"」已保存\n刷新不丢失，清缓存会失效");
+}
+
+</script>
+</body>
+</html>
