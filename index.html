@@ -3,7 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>随机旅行</title>
+<title>旅行盲盒</title>
+
+<!-- 高德安全密钥（必须放在 maps 之前） -->
+<script>
+    window._AMapSecurityConfig = {
+        securityJsCode: '18b2dacc4bab224d0f72f5af18e6e01f'
+    };
+</script>
+<!-- 高德 JS API（Web端 v2.0） -->
+<script src="https://webapi.amap.com/maps?v=2.0&key=339ab0cd2544ce7f39ab53788b7b395b&plugin=AMap.CitySearch"></script>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
 body{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
@@ -48,13 +58,7 @@ input,select{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius
 .point.n{background:#3b82f6}
 .point .lb{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;padding:2px 6px;border-radius:3px;font-size:11px;white-space:nowrap;opacity:0;transition:.2s}
 .point:hover .lb{opacity:1}
-.point .seq{
-  position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  font-size:10px;font-weight:900;color:#fff;
-  pointer-events:none;
-  text-shadow:0 1px 2px rgba(0,0,0,.5);
-}
+.point .seq{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;font-weight:900;color:#fff;pointer-events:none;text-shadow:0 1px 2px rgba(0,0,0,.5)}
 .day-card{border:1px solid #e2e8f0;border-radius:10px;padding:12px;margin-bottom:10px}
 .day-title{font-weight:bold;color:#667eea;margin-bottom:8px;font-size:14px}
 .tl{position:relative;padding-left:20px;margin-bottom:8px}
@@ -82,26 +86,17 @@ input,select{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius
 .col li::before{content:'•';position:absolute;left:0;color:#667eea}
 .metro{font-size:13px;line-height:1.8;color:#475569}
 
-/* ===== 移动端专项修复 ===== */
-/* iOS Safari：表单元素16px防自动放大 */
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   select, input[type="text"] { font-size: 16px; }
 }
-
 @media(max-width:600px){
   .row{flex-direction:column}
   .overview{grid-template-columns:repeat(2,1fr)}
   .three-col{grid-template-columns:1fr}
-  /* 卡片内边距收窄，适配小屏宽度 */
   .card{padding:14px 12px}
-  /* 地图高度压缩 */
   .map{height:200px}
-  /* 天数按钮缩小适配 */
   .day{min-width:90px;padding:8px 10px;font-size:12px}
-  /* 标签加高居中，触控更跟手 */
-  .tag{padding:5px 10px;font-size:12px;min-height:32px;
-       display:flex;align-items:center;justify-content:center}
-  /* 地图点位触控靶扩大至28px，接近44px下限 */
+  .tag{padding:5px 10px;font-size:12px;min-height:32px;display:flex;align-items:center;justify-content:center}
   .point{width:28px;height:28px}
   .point .seq{font-size:11px}
 }
@@ -113,7 +108,16 @@ input,select{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius
 
 <div id="inputSec" class="card">
   <div class="row">
-    <div><label>出发城市</label><input type="text" id="depCity" placeholder="例如：南通" value="南通"></div>
+    <div>
+  <label>出发城市</label>
+  <div style="display:flex;gap:8px;align-items:center">
+    <input type="text" id="depCity" placeholder="例如：三里屯" style="flex:1">
+    <button type="button" id="locBtn" onclick="readLocation()" 
+      style="padding:8px 12px;border:1px solid #667eea;background:#667eea;color:#fff;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap;transition:.2s">
+      📍 读取位置
+    </button>
+  </div>
+</div>
     <div><label>人均预算档位</label>
       <select id="budget">
         <option value="1500">💰 经济穷游（1500元内）</option>
@@ -209,6 +213,101 @@ input,select{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius
 </div>
 
 <script>
+// ===== 定位相关（GPS优先 + IP兜底，初始placeholder显示）=====
+const depInput = document.getElementById('depCity');
+const locBtn = document.getElementById('locBtn');
+
+// 页面加载：不填兜底，让 placeholder="例如：三里屯" 淡灰显示
+
+function readLocation() {
+    if (locBtn.disabled) return;
+    locBtn.disabled = true;
+    var origText = locBtn.innerText;
+    locBtn.innerText = '⏳ 定位中…';
+
+    // ——— 优先 GPS + 高德逆地理 ———
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                var lat = pos.coords.latitude, lng = pos.coords.longitude;
+                console.log('[定位] GPS坐标:', lat, lng);
+                ensureAMap(function() {
+                    AMap.plugin('AMap.Geocoder', function() {
+                        var geo = new AMap.Geocoder();
+                        geo.getAddress([lng, lat], function(st, res) {
+                            if (st === 'complete' && res.info === 'OK') {
+                                var city = (res.regeocode.addressComponent.city || res.regeocode.addressComponent.province).replace(/市$/, '');
+                                depInput.value = city;
+                                locBtn.innerText = '✅ 已定位';
+                                console.log('[定位] GPS成功 →', city);
+                            } else {
+                                console.warn('[定位] 逆地理失败，走IP', res);
+                                fallbackIP();
+                            }
+                        });
+                    });
+                }, fallbackAMapErr);
+            },
+            function(err) {
+                console.warn('[定位] GPS被拒, code=' + err.code);
+                fallbackIP();
+            },
+            { enableHighAccuracy: true, timeout: 8000 }
+        );
+    } else {
+        fallbackIP();
+    }
+
+    // ——— IP 定位 fallback ———
+    function fallbackIP() {
+        ensureAMap(function() {
+            AMap.plugin('AMap.CitySearch', function() {
+                var cs = new AMap.CitySearch();
+                cs.getLocalCity(function(st, res) {
+                    console.log('[定位] CitySearch 返回:', st, res);
+                    if (st === 'complete' && res.info === 'OK') {
+                        depInput.value = res.city.replace(/市$/, '');
+                        locBtn.innerText = '✅ 已定位(IP)';
+                    } else {
+                        depInput.value = "";
+                        locBtn.innerText = '❌ 定位失败，请手动输入';
+                    }
+                    locBtn.disabled = false;
+                });
+            });
+        }, fallbackAMapErr);
+    }
+
+    // ——— 等 AMap 加载 ———
+    function ensureAMap(cb, onTimeout) {
+        if (window.AMap) { cb(); return; }
+        var tries = 0;
+        var t = setInterval(function() {
+            tries++;
+            if (window.AMap) { clearInterval(t); cb(); }
+            else if (tries > 30) {
+                clearInterval(t);
+                console.warn('[定位] AMap 加载超时');
+                if (onTimeout) onTimeout();
+            }
+        }, 200);
+    }
+
+    function fallbackAMapErr() {
+        depInput.value = "";
+        locBtn.innerText = '❌ 地图加载失败';
+        locBtn.disabled = false;
+    }
+
+    // 3 秒按钮复原兜底
+    setTimeout(function() {
+        if (locBtn.innerText.indexOf('⏳') !== -1) {
+            locBtn.innerText = origText;
+            locBtn.disabled = false;
+        }
+    }, 3000);
+}
+
 var cities = [
 
 // 1.北京
@@ -1182,7 +1281,10 @@ var cities = [
   name: "大连",
   slogan: "浪漫之都，北方明珠",
   tags: ["海滨城市", "俄日风情", "海鲜美食"],
-  matchTags:  [{name: "周水子机场", x: 30, y: 20, type: "s", metro: "2号线 机场"},
+  matchTags: ["海岛度假", "美食探店", "亲子游乐"],
+  budgetLevel: 2,
+  spots: [
+    {name: "周水子机场", x: 30, y: 20, type: "s", metro: "2号线 机场"},
     {name: "星海广场", x: 35, y: 50, type: "n", order: 1, metro: "1号线 星海广场"},
     {name: "老虎滩", x: 60, y: 45, type: "n", order: 2, metro: "公交直达"},
     {name: "金石滩", x: 85, y: 15, type: "n", order: 3, metro: "3号线 金石滩"},
@@ -1228,7 +1330,7 @@ var cities = [
     {name: "布达拉宫", x: 50, y: 40, type: "n", order: 1, metro: "公交直达"},
     {name: "大昭寺", x: 55, y: 45, type: "n", order: 2, metro: "步行可达"},
     {name: "八廓街", x: 53, y: 47, type: "n", order: 3, metro: "步行可达"},
-    {name: "纳木错", x: 30, y: 10, type: "n", order: 4, metro: "包车4小时"},
+    {name: "纳木错", x: 30, y: 10, type: "n", order: 4, metro: "包车往返"},
     {name: "拉萨站", x: 70, y: 55, type: "e", metro: "公交直达"}
   ],
   hotels: [
@@ -1242,13 +1344,13 @@ var cities = [
     {t: "抵达·适应高原", acts: [{ti: "下午", s: "抵达入住市区", d: "当天不洗澡不剧烈运动"}, {ti: "晚上", s: "布达拉宫广场夜景", d: "药王山拍50元人民币背景"}]},
     {t: "布达拉宫·大昭寺", acts: [{ti: "上午", s: "布达拉宫", d: "提前7天预约，世界文化遗产"}, {ti: "下午", s: "大昭寺+八廓街", d: "藏传佛教圣地转经道"}]},
     {t: "纳木错一日", acts: [{ti: "全天", s: "纳木错圣象天门", d: "西藏三大圣湖之一，海拔4700"}]},
-    {t: "羊卓雍措", acts: [{ti: "全天", s: "羊卓雍措", d: "碧玉般的圣湖，盘山公路绝美"}]},
-    {t: "色拉寺·收官", acts: [{ti: "上午", s: "色拉寺辩经", d: "下午3点辩经很有特色"}, {ti: "下午", s: "采购返程", d: "藏红花牦牛肉干酥油茶伴手礼"}]}
+    {t: "羊卓雍措", acts: [{ti: "全天", s: "羊卓雍措", d: "碧玉般的圣湖，盘山公路观景"}]},
+    {t: "色拉寺·收官", acts: [{ti: "上午", s: "色拉寺辩经", d: "下午3点特色辩经仪式"}, {ti: "下午", s: "采购返程", d: "藏红花牦牛肉干伴手礼"}]}
   ],
-  metro: ["无地铁，公交+打车+包车为主", "景点分散建议报纯玩团或包车", "市区内打车便宜", "APP：高德地图"],
-  pack: ["厚外套（即使夏天也冷）", "防晒霜SPF50+", "墨镜帽子", "红景天（提前吃）", "氧气瓶（当地买）"],
-  tips: ["刚到不要洗澡洗头避免高反", "布达拉宫提前7天抢票", "不要随意拍当地人先征得同意", "带点葡萄糖缓解高反"],
-  save: ["市区景点步行可达", "报团比自己去划算", "很多寺庙门票不贵"],
+  metro: ["无地铁，公交+打车+包车为主", "景点分散建议报纯玩团或包车", "市区内打车便宜", "APP：高德地图打车"],
+  pack: ["厚外套（即使夏天也冷）", "防晒霜SPF50+", "墨镜帽子", "氧气瓶（当地买）", "红景天（提前吃）"],
+  tips: ["刚到不要洗澡洗头避免高反", "布达拉宫务必提前一周抢票", "不要随意拍摄僧侣和当地人", "带葡萄糖缓解高反"],
+  save: ["市区景点步行可达省车费", "报团比自己包车划算", "很多寺庙门票不贵"],
   costs: [
     {i: "往返大交通", a: "1500-2500"},
     {i: "4晚住宿", a: "800-1500"},
@@ -1289,8 +1391,8 @@ var cities = [
   ],
   metro: ["1号线：南北主干线，机场-三屯碑", "2号线：高铁站方向", "APP：乌鲁木齐地铁"],
   pack: ["防晒霜（紫外线强）", "薄外套（昼夜温差大）", "舒适鞋", "充电宝", "水杯"],
-  tips: ["新疆与内地有2小时时差", "昼夜温差大带外套", "安检多带好身份证", "买东西论公斤问清楚"],
-  save: ["美食量大实惠", "市区景点不贵", "住宿性价比高"],
+  tips: ["新疆与内地有2小时时差", "买东西论公斤问清楚价格", "安检多务必带身份证", "尊重少数民族习俗"],
+  save: ["美食量大实惠", "市区景点门票便宜", "住宿性价比高"],
   costs: [
     {i: "往返交通", a: "1000-2000"},
     {i: "4晚住宿", a: "500-900"},
@@ -1331,8 +1433,8 @@ var cities = [
   ],
   metro: ["1号线：东西主干线，机场-东站", "2号线：南北主干线", "APP：青城地铁"],
   pack: ["薄外套（草原风大）", "防晒霜", "舒适鞋", "充电宝", "防蚊液（夏季）"],
-  tips: ["草原早晚温差大带厚外套", "骑马注意安全听牧民指挥", "蒙餐量大别点太多", "尊重蒙古族习俗"],
-  save: ["消费普遍不高", "住宿便宜", "美食实惠量大"],
+  tips: ["草原早晚温差大带厚外套", "骑马注意安全听牧民指挥", "蒙餐分量大别点太多", "尊重蒙古族习俗"],
+  save: ["消费普遍不高", "市区景点便宜", "报草原一日游划算"],
   costs: [
     {i: "往返交通", a: "600-1200"},
     {i: "4晚住宿", a: "400-700"},
@@ -1350,7 +1452,7 @@ var cities = [
   matchTags: ["历史文化", "自然风光", "户外探险"],
   budgetLevel: 1,
   spots: [
-    {name: "河东机场", x: 75, y: 40, type: "s", metro: "河东机场"},
+    {name: "河东机场", x: 75, y: 40, type: "s", metro: "机场大巴"},
     {name: "西夏王陵", x: 25, y: 35, type: "n", order: 1, metro: "旅游专线"},
     {name: "镇北堡西部影城", x: 20, y: 25, type: "n", order: 2, metro: "旅游专线"},
     {name: "沙湖", x: 40, y: 10, type: "n", order: 3, metro: "大巴1小时"},
@@ -1371,10 +1473,10 @@ var cities = [
     {t: "水洞沟", acts: [{ti: "全天", s: "水洞沟", d: "旧石器时代遗址藏兵洞"}]},
     {t: "美食收官", acts: [{ti: "上午", s: "宁夏博物馆", d: "了解西夏历史"}, {ti: "下午", s: "采购返程", d: "枸杞贺兰石滩羊特产"}]}
   ],
-  metro: ["暂无地铁，公交+打车+旅游专线", "景点分散建议报一日游", "市区打车便宜", "APP：高德地图"],
+  metro: ["暂无地铁，公交+打车+旅游专线", "景点分散建议报一日游", "市区打车便宜", "APP：高德地图打车"],
   pack: ["防晒霜", "薄外套（昼夜温差大）", "舒适鞋", "口罩（防风沙）", "充电宝"],
-  tips: ["春季多风沙带口罩", "昼夜温差大带外套", "西夏王陵建议请讲解", "枸杞正宗可以买"],
-  save: ["消费偏低", "住宿便宜", "报一日游省心划算"],
+  tips: ["春季多风沙带口罩", "西夏王陵建议请讲解", "枸杞可以买正宗中宁的", "西北气候干燥多喝水"],
+  save: ["整体消费偏低", "住宿便宜", "报一日游省心划算"],
   costs: [
     {i: "往返交通", a: "500-1000"},
     {i: "4晚住宿", a: "350-600"},
@@ -1407,16 +1509,16 @@ var cities = [
     ]}
   ],
   itinerary: [
-    {t: "抵达·适应高原", acts: [{ti: "下午", s: "抵达入住市区", d: "海拔2200米一般无高反"}, {ti: "晚上", s: "莫家街美食", d: "吃手抓羊肉酿皮酸奶"}]},
+    {t: "抵达·适应高原", acts: [{ti: "下午", s: "抵达入住市区", d: "海拔2200一般无高反"}, {ti: "晚上", s: "莫家街美食", d: "手抓羊肉酿皮酸奶"}]},
     {t: "塔尔寺·东关大寺", acts: [{ti: "上午", s: "塔尔寺", d: "藏传佛教格鲁派六大寺之一"}, {ti: "下午", s: "东关清真大寺", d: "西北最大清真寺之一"}]},
-    {t: "青海湖一日", acts: [{ti: "全天", s: "青海湖二郎剑", d: "中国最大咸水湖油菜花海7-8月"}]},
+    {t: "青海湖一日", acts: [{ti: "全天", s: "青海湖二郎剑", d: "中国最大咸水湖7-8月油菜花海"}]},
     {t: "茶卡盐湖", acts: [{ti: "全天", s: "茶卡盐湖天空之镜", d: "穿红裙子拍照绝美"}]},
     {t: "美食收官", acts: [{ti: "上午", s: "青海省博物馆", d: "了解青海历史文化"}, {ti: "下午", s: "采购返程", d: "冬虫夏草牦牛肉干青稞酒"}]}
   ],
-  metro: ["暂无地铁，公交+打车+旅游大巴", "青海湖茶卡建议报两日游", "市区打车便宜", "APP：高德地图"],
-  pack: ["厚外套（湖边很冷）", "防晒霜SPF50+", "墨镜帽子", "舒适鞋", "充电宝"],
-  tips: ["青海湖即使夏天也很冷带厚外套", "茶卡盐湖晴天去才好看", "尊重当地宗教习俗", "带点肠胃药"],
-  save: ["市区消费不高", "报团比自己去划算", "住宿便宜"],
+  metro: ["暂无地铁，公交+打车+旅游大巴", "青海湖茶卡建议报两日游", "市区打车便宜", "APP：高德地图打车"],
+  pack: ["厚外套（湖边很冷）", "防晒霜SPF50+", "墨镜帽子", "舒适鞋", "肠胃药"],
+  tips: ["青海湖即使夏天也很冷带厚外套", "茶卡盐湖晴天去才好看", "尊重宗教习俗进寺脱帽", "高原不要剧烈运动"],
+  save: ["市区消费不高", "报团比自己去划算", "很多寺庙门票不贵"],
   costs: [
     {i: "往返交通", a: "700-1400"},
     {i: "4晚住宿", a: "400-700"},
@@ -1453,11 +1555,11 @@ var cities = [
     {t: "假日海滩·火山口", acts: [{ti: "上午", s: "假日海滩", d: "西海岸最长海滩"}, {ti: "下午", s: "火山口国家地质公园", d: "中国雷琼世界地质公园"}]},
     {t: "东寨港红树林", acts: [{ti: "全天", s: "东寨港红树林", d: "海上森林坐船游览"}]},
     {t: "冯小刚电影公社", acts: [{ti: "全天", s: "观澜湖华谊冯小刚电影公社", d: "民国风南洋风拍照圣地"}]},
-    {t: "美食收官", acts: [{ti: "上午", s: "海南省博物馆", d: "了解海南历史文化"}, {ti: "下午", s: "采购返程", d: "椰子糖胡椒粉文昌鸡特产"}]}
+    {t: "免税城收官", acts: [{ti: "上午", s: "海南省博物馆", d: "了解海南历史文化"}, {ti: "下午", s: "采购返程", d: "椰子糖胡椒粉文昌鸡特产"}]}
   ],
-  metro: ["1号线：东西主干线，机场-东站", "公交覆盖主要景点", "APP：海口地铁"],
+  metro: ["1号线：东西主干线，机场-东站", "公交覆盖主要区域", "APP：海口地铁"],
   pack: ["防晒霜SPF50+", "泳衣", "薄外套（空调房冷）", "雨伞", "防蚊液"],
-  tips: ["紫外线强注意防晒", "海鲜别在景区吃", "清补凉必吃", "冬季是旺季"],
+  tips: ["紫外线强注意防晒", "海鲜先问价再吃", "清补凉必吃", "冬季是旺季人多"],
   save: ["消费比三亚低很多", "很多公园免费", "住宿性价比高"],
   costs: [
     {i: "往返交通", a: "600-1200"},
